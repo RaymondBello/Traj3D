@@ -85,7 +85,7 @@ class ParameterUI(object):
                     format=f"%.4f {self.params[sect][item]['unit']}",
                 )
 
-            print(f"[INFO] Added {sect}.{item}")
+            print(f"[INFO] Parameter added {sect}.{item}")
             # print(self.params[sect][item])
 
         def add_param_section(section):
@@ -94,5 +94,5 @@ class ParameterUI(object):
                 add_param(section, p)
 
         for key in self.params:
-            if key != "Assets":
+            if key == "Initial Conditions":
                 add_param_section(key)

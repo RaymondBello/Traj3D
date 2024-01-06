@@ -7,7 +7,7 @@ from pyqtgraph.Qt import QtCore, QtGui
 import dearpygui.dearpygui as dpg
 import dearpygui.demo as demo
 
-from viewport import *
+from ui_viewport import *
 
 # Create a variable dict
 variables = {

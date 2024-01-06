@@ -102,16 +102,21 @@ class Viewport(object):
             pos (list, optional): new location of mesh in x, y, z, r, p, y axis (unit is meters). Defaults to None.
 
         """
-
+        # Compute the transformation matrix for the given vertices and location
         def compute_transformation_matrix(vertices, location: list):
+            # Create a 4x4 identity matrix
             T = np.eye(4)
+            # Set the translation components of the transformation matrix
             T[:3, 3] = location[:3]
+            # Set the rotation components of the transformation matrix using Euler angles
             T[:3, :3] = trimesh.transformations.euler_matrix(
                 location[3], location[4], location[5]
             )[:3, :3]
+            # Apply the transformation matrix to the vertices to get the transformed vertices
             transformed_vertices = np.dot(
                 T, np.hstack((vertices, np.ones((vertices.shape[0], 1)))).T
             ).T[:, :3]
+            # Return the transformed vertices
             return transformed_vertices
 
         mesh_item.setMeshData(
@@ -159,13 +164,13 @@ class ViewportUI(object):
         self.initialize()
 
     def initialize(self):
-        app = pg.mkQApp(self.opts["title"])
+        self.window = pg.mkQApp(self.opts["title"])
         self.view = Viewport()
         self.view.viewer.setFixedWidth(int(self.opts["v_width"]))
         self.view.viewer.setFixedHeight(int(self.opts["v_height"]))
-        self.view.viewer.show()
+        # self.view.viewer.show()
         self.view.viewer.setWindowTitle(self.opts["title"])
-        self.view.viewer.setCameraPosition(distance=100, azimuth=30, elevation=30)
+        self.view.viewer.setCameraPosition(distance=100, azimuth=30, elevation=15)
 
         # Initialize grid
         grid_size = QtGui.QVector3D(100, 100, 100)
@@ -179,15 +184,18 @@ class ViewportUI(object):
         gy.translate(0, -grid_size.y() / 2, grid_size.y() / 2)
         gz.translate(0, 0, 0)
 
-        self.view.viewer.addItem(gx)
-        self.view.viewer.addItem(gy)
-        self.view.viewer.addItem(gz)
+        if self.opts['show_xyz_grid'][0]:
+            self.view.viewer.addItem(gx)
+        if self.opts['show_xyz_grid'][1]:
+            self.view.viewer.addItem(gy)
+        if self.opts['show_xyz_grid'][2]:
+            self.view.viewer.addItem(gz)
 
     def add_mesh(self, path: str, color: tuple, pos: list):
         mesh = trimesh.load(path)
-        self.params["assets"][path] = {}
-        self.params["assets"][path]["mesh"] = mesh
-        self.params["assets"][path]["mesh_inst"] = self.viewer.add_mesh(
+        self.params["Assets"][path] = {}
+        self.params["Assets"][path]["mesh"] = mesh
+        self.params["Assets"][path]["mesh_inst"] = self.view.add_mesh(
             mesh, color, pos
         )
 

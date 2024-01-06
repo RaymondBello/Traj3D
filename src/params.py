@@ -1,4 +1,7 @@
 import configparser
+import numpy as np
+
+from components import *
 
 parameters = {
     "Initial Conditions": {
@@ -51,8 +54,15 @@ parameters = {
             "tip": "Rocket Initial Attitude Angle (r,p,y)",
         },
     },
+    "Entities": {
+        "rocket0": {"id": 0, "position": np.zeros((3)), "transform": np.zeros((3))},
+        "rocket1": {"id": 1, "position": np.zeros((3)), "transform": np.zeros((3))},
+    },
+    "Assets": {
+        "rocket0": "resources/StarShip.stl",
+        "rocket1": "resources/SuperHeavy_Booster.stl",
+    },
     "State Variables": {},
-    "Assets": {},
 }
 
 

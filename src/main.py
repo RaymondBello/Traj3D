@@ -11,8 +11,10 @@ def main():
         "show_demo": True,
         "no_title_bar": False,
         "menubar": True,
-        "update_ms": 50,
-        "show_metrics": False
+        "update_ms": 1,
+        "show_metrics": False,
+        "show_xyz_grid":[False, False, True],
+        
     }
 
     App = MainApplication(opts)
