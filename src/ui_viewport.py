@@ -168,7 +168,6 @@ class ViewportUI(object):
         self.view = Viewport()
         self.view.viewer.setFixedWidth(int(self.opts["v_width"]))
         self.view.viewer.setFixedHeight(int(self.opts["v_height"]))
-        # self.view.viewer.show()
         self.view.viewer.setWindowTitle(self.opts["title"])
         self.view.viewer.setCameraPosition(distance=100, azimuth=30, elevation=15)
 

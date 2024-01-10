@@ -3,7 +3,7 @@ import trimesh
 from components import *
 from systems import *
 
-from ui_param import ParameterUI
+from ui_params import ParameterUI
 from ui_viewport import ViewportUI
 
 

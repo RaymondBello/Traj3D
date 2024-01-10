@@ -1,7 +1,9 @@
-from ui_param import *
+from ui_params import *
 from ui_viewport import *
 from sim import *
 from params import parameters
+import threading
+
 
 import time
 
@@ -15,11 +17,13 @@ class MainApplication:
         # check if INI file exists
         self.params = parameters
 
-        self.param_ui = ParameterUI(self.opts)
-        self.param_ui.create_window(self.params)
+        # self.param_ui = ParameterUI(self.opts)
+        # self.param_ui.create_window(self.params)
 
         self.view_ui = ViewportUI(self.opts, self.params)
-        self.view_ui.view.viewer.show()
+
+        self.param_ui = ParameterUI(self.opts, self.params)
+
         self.simulation = Simulator(self.view_ui, self.params)
 
         self.time = time.perf_counter_ns()
@@ -42,7 +46,24 @@ class MainApplication:
         t.start(
             self.opts["update_ms"]
         )  # Start the timer with a timeout of 50 milliseconds
-        dpg.start_dearpygui()
-        dpg.destroy_context()
 
+        self.param_ui.start_event_loop()
+        
+        # self.view_ui.view.viewer.show()
         # pg.exec()
+
+        # dpg.start_dearpygui()
+        # dpg.destroy_context()
+        
+        # async def run_async(self):
+        #     self.param_ui.start_event_loop()
+
+        #     await asyncio.sleep(0)  # Allow other tasks to run
+
+        #     self.view_ui.view.viewer.show()
+        #     await asyncio.sleep(0)  # Allow other tasks to run
+
+        #     pg.exec()
+
+        # def run(self):
+        #     asyncio.run(self.run_async())
