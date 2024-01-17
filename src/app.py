@@ -17,16 +17,28 @@ class MainApplication:
         # check if INI file exists
         self.params = parameters
 
-        # self.param_ui = ParameterUI(self.opts)
-        # self.param_ui.create_window(self.params)
+        # self.view_ui = ViewportUI(self.opts, self.params)
+        # self.view_ui.view.viewer.show()
+        # pg.exec()
 
-        self.view_ui = ViewportUI(self.opts, self.params)
+        self.new_view_ui: Viewport
+        # self.view_ui_thread = threading.Thread(target=self.init_view_ui)
+        # self.view_ui_thread.start()
+        # self.view_ui_thread.join()
+
+        self.new_view_ui = ViewportUI(self.opts, self.params)
+        # self.new_view_ui.view.viewer.show()
 
         self.param_ui = ParameterUI(self.opts, self.params)
 
-        self.simulation = Simulator(self.view_ui, self.params)
+        self.simulation = Simulator(self.new_view_ui, self.params)
 
         self.time = time.perf_counter_ns()
+
+    def init_view_ui(self):
+        self.new_view_ui = ViewportUI(self.opts, self.params)
+        # self.new_view_ui.view.viewer.show()
+        # pg.exec()
 
     def update(self):
         timeNow = time.perf_counter_ns()
@@ -47,23 +59,5 @@ class MainApplication:
             self.opts["update_ms"]
         )  # Start the timer with a timeout of 50 milliseconds
 
-        self.param_ui.start_event_loop()
-        
-        # self.view_ui.view.viewer.show()
         # pg.exec()
-
-        # dpg.start_dearpygui()
-        # dpg.destroy_context()
-        
-        # async def run_async(self):
-        #     self.param_ui.start_event_loop()
-
-        #     await asyncio.sleep(0)  # Allow other tasks to run
-
-        #     self.view_ui.view.viewer.show()
-        #     await asyncio.sleep(0)  # Allow other tasks to run
-
-        #     pg.exec()
-
-        # def run(self):
-        #     asyncio.run(self.run_async())
+        self.param_ui.start_event_loop()

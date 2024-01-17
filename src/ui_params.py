@@ -1,11 +1,22 @@
 from enum import Enum
 import time
-import os
-from imgui_bundle import hello_imgui, icons_fontawesome, imgui, immapp
+import os, sys
+from imgui_bundle import (
+    hello_imgui,
+    icons_fontawesome,
+    imgui,
+    immapp,
+    implot,
+    ImVec2,
+    ImVec4,
+)
 from imgui_bundle.demos_python import demo_utils
 from typing import List
+import OpenGL.GL as GL
+import ctypes
 
 from components import *
+from utils import *
 
 
 class ParameterUI(object):
@@ -16,6 +27,14 @@ class ParameterUI(object):
         # Load application state from parameters
         self.param_state = ParameterUIState()
         self.runner_params = None
+
+        self.buff_size = 1000
+        self.mouseX = ScrollingBuffer(self.buff_size)
+
+        self.var = {
+            "mouseX": self.mouseX,
+            "mouseY": np.array([0 for i in range(self.buff_size)]),
+        }
 
         self.inspector_id_selected = True
         self.inspector_id_input = ""
@@ -50,6 +69,9 @@ class ParameterUI(object):
         )
         # self.load_fonts(self.opts["font"], self.opts["font_size"])
 
+        self.runner_params.callbacks.post_init = lambda: self.init_3d_resources()
+        self.runner_params.callbacks.before_exit = lambda: self.destroy_3d_resources()
+
         # Configure status bar
         self.runner_params.imgui_window_params.show_status_bar = True
         self.runner_params.callbacks.show_status = lambda: self.status_bar
@@ -68,6 +90,7 @@ class ParameterUI(object):
         # Create the application layout
         self.runner_params.imgui_window_params.default_imgui_window_type = (
             hello_imgui.DefaultImGuiWindowType.provide_full_screen_dock_space
+            # hello_imgui.DefaultImGuiWindowType.no_default_window
         )
         self.runner_params.imgui_window_params.enable_viewports = True
         self.runner_params.docking_params = self.create_layout(self.param_state)
@@ -78,8 +101,32 @@ class ParameterUI(object):
         self.runner_params.ini_folder_type = hello_imgui.IniFolderType.current_folder
         self.runner_params.ini_filename = self.opts["log_file"]
 
+        # custom_background is called every frame, and is used to display the custom background
+        # self.runner_params.callbacks.custom_background = lambda: self.viewport_render
+
+        # Initialize plots
+        implot.create_context()
+
+    def init_3d_resources(self):
+        self.full_screen_quad_vao = self.create_full_screen_quad_vao()
+
+    def destroy_3d_resources(self):
+        GL.glDeleteVertexArrays(1, [self.full_screen_quad_vao])
+
+    def create_full_screen_quad_vao(self):
+        
+        
+        
+        return 10
+        
+        
+
     def start_event_loop(self):
-        hello_imgui.run(self.runner_params)
+        # hello_imgui.run(self.runner_params)
+
+        add_ons_params = immapp.AddOnsParams()
+        add_ons_params.with_markdown = True
+        immapp.run(self.runner_params, add_ons_params)
 
     def create_docking_splits(self):
         #    _____________________________________________
@@ -130,11 +177,8 @@ class ParameterUI(object):
             self.inspector_id_input,
             flags=imgui.InputTextFlags_.chars_no_blank.value,
         )
-        imgui.pop_font()
 
         imgui.separator()
-
-        imgui.push_font(self.font)
 
         # First collapsible header
         if imgui.collapsing_header(
@@ -157,17 +201,43 @@ class ParameterUI(object):
 
         imgui.pop_font()
 
-    def create_editor(self):
+    def create_sceneview(self):
+        imgui.push_font(self.font)
+        imgui.text("Scene Framebuffer")
+
+        scene_w = imgui.get_content_region_avail().x
+        scene_h = imgui.get_content_region_avail().y
+        
+        # hello_imgui.log(hello_imgui.LogLevel.info, f"sceneview dimensions {scene_w, scene_h}")
+        
+        
+        
+        
+        
+        # Start the Dear ImGui frame
+        # imgui.backends.opengl3_new_frame()
+        imgui.pop_font()
+
+    def create_plots(self):
         # Show demo
         if self.opts["show_demo"]:
             imgui.show_demo_window()
 
         imgui.push_font(self.font)
-        imgui.text("Editor")
+        imgui.text("Plots")
         imgui.pop_font()
-        hello_imgui.image_from_asset(
-            "images/house.jpg", hello_imgui.em_to_vec2(3.0, 3.0)
-        )
+
+        t = 0.0
+        t += imgui.get_io().delta_time
+        framerate = 1 / t
+
+        self.mouseX.add_point(framerate, imgui.get_mouse_pos().x)
+
+        if implot.begin_plot("FPS", imgui.ImVec2(-1, 250)):
+            implot.setup_axes("Time", "Framerate")
+            # implot.setup_axis_limits(implot.ImAxis_.x1.value, )
+            implot.plot_line("FPS", self.mouseX.data[0, :])
+            implot.end_plot()
 
     def create_scene_nodes(self):
         imgui.push_font(self.font)
@@ -218,10 +288,16 @@ class ParameterUI(object):
         inspector.gui_function = lambda: self.create_inspector(state)
 
         # Editor
-        editor = hello_imgui.DockableWindow()
-        editor.label = f" {icons_fontawesome.ICON_FA_IMAGE} Editor"
-        editor.dock_space_name = "MainDockSpace"
-        editor.gui_function = self.create_editor
+        flight_plots = hello_imgui.DockableWindow()
+        flight_plots.label = f" {icons_fontawesome.ICON_FA_IMAGE} Flight Plots"
+        flight_plots.dock_space_name = "MainDockSpace"
+        flight_plots.gui_function = self.create_plots
+
+        # Scene View
+        scene_view = hello_imgui.DockableWindow()
+        scene_view.label = f" {icons_fontawesome.ICON_FA_IMAGE} Scene"
+        scene_view.dock_space_name = "MainDockSpace"
+        scene_view.gui_function = self.create_sceneview
 
         # Logger
         logs = hello_imgui.DockableWindow()
@@ -230,10 +306,10 @@ class ParameterUI(object):
         logs.gui_function = hello_imgui.log_gui
 
         # Scene Node Graph
-        scene = hello_imgui.DockableWindow()
-        scene.label = f" {icons_fontawesome.ICON_FA_SITEMAP} Scene Hierarchy"
-        scene.dock_space_name = "Scene"
-        scene.gui_function = self.create_scene_nodes
+        scene_hier = hello_imgui.DockableWindow()
+        scene_hier.label = f" {icons_fontawesome.ICON_FA_SITEMAP} Scene Hierarchy"
+        scene_hier.dock_space_name = "Scene"
+        scene_hier.gui_function = self.create_scene_nodes
 
         # Imgui Demo
         # if self.opts["show_demo"]:
@@ -244,9 +320,10 @@ class ParameterUI(object):
 
         dockable_windows = [
             inspector,
-            editor,
+            flight_plots,
+            scene_view,
             logs,
-            scene,
+            scene_hier,
         ]
         return dockable_windows
 
@@ -273,6 +350,7 @@ class ParameterUI(object):
         hello_imgui.imgui_default_settings.load_default_font_with_font_awesome_icons()
 
         self.font = hello_imgui.load_font_ttf(font, size)
+        hello_imgui.log(hello_imgui.LogLevel.info, f"loaded font {self.font}")
 
     def status_bar(self):
         if self.param_state.is_solving == True:
