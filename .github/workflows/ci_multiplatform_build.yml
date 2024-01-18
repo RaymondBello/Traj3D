@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        submodules: true
+        submodules: false
 
 #    - name: Setup interactive tmate session
 #      uses: mxschmitt/action-tmate@v3
