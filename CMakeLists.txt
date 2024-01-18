@@ -27,7 +27,6 @@ file(GLOB_RECURSE APP_HEADERS "include/*.h")
 
 
 
-
 imgui_bundle_add_app(TrajectorySim ${APP_SOURCES} ${APP_HEADERS})
 
 if (APPLE)
