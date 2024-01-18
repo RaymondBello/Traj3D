@@ -20,9 +20,8 @@ jobs:
 
     - name: Clone imgui_bundle
       run: |
-        mkdir -p external && cd external
-        git clone https://github.com/pthom/imgui_bundle.git
-        cd imgui_bundle && git submodule update --init --recursive && cd ..
+        cd external/imgui_bundle
+        git submodule update --init --recursive && cd ..
         cd ..
 
 #    - name: Setup interactive tmate session
