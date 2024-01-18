@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: "CI Multi-platform Build"
+    name: "Build"
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
