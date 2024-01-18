@@ -1,4 +1,4 @@
-name: "CI Multi-platform Build"
+name: "CI"
 
 # This is an example of a CI workflow that builds the project on all desktop platforms
 
