@@ -1,0 +1,2 @@
+/Library/Developer/CommandLineTools/usr/bin/ar qc libimspinner.a CMakeFiles/imspinner.dir/imspinner/imspinner/imspinner.cpp.o
+/Library/Developer/CommandLineTools/usr/bin/ranlib libimspinner.a

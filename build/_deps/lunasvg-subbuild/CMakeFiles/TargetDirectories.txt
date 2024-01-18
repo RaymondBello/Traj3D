@@ -1,0 +1,3 @@
+/Users/raybello/Github/TrajectorySim/build/_deps/lunasvg-subbuild/CMakeFiles/lunasvg-populate.dir
+/Users/raybello/Github/TrajectorySim/build/_deps/lunasvg-subbuild/CMakeFiles/edit_cache.dir
+/Users/raybello/Github/TrajectorySim/build/_deps/lunasvg-subbuild/CMakeFiles/rebuild_cache.dir

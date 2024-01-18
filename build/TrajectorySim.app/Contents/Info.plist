@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>com.helloimgui.trajectorysim</string>
+
+	<key>CFBundleName</key>
+	<string>TrajectorySim</string>
+
+	<key>CFBundleDisplayName</key>
+	<string>TrajectorySim</string>
+
+	<key>CFBundleExecutable</key>
+	<string>TrajectorySim</string>
+
+	<key>CFBundleShortVersionString</key>
+	<string>0.0.1</string>
+
+	<key>CFBundleVersion</key>
+	<string>0.0.1</string>
+
+	<key>NSHumanReadableCopyright</key>
+	<string></string>
+
+	<key>CFBundleIconFile</key>
+	<string>icon.icns</string>
+
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>Bluetooth is used (by the SDL Library) when using Bluetooth joysticks</string>
+</dict>
+</plist>
