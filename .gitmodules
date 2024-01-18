@@ -1,0 +1,6 @@
+[submodule "imgui_bundle"]
+	path = imgui_bundle
+	url = https://github.com/pthom/imgui_bundle.git
+[submodule "external/imgui_bundle"]
+	path = external/imgui_bundle
+	url = https://github.com/pthom/imgui_bundle.git
