@@ -1,4 +1,4 @@
-name: "CI Multiplatform Build"
+name: "CI Multi-platform Build"
 
 # This is an example of a CI workflow that builds the project on all desktop platforms
 
@@ -9,12 +9,13 @@ on:
 
 jobs:
   build:
-    name: "CI Multiplatform Build"
+    name: "CI Multi-platform Build"
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-latest, macos-latest, ubuntu-latest]
+        platform: [windows-latest, macos-latest]
+        # platform: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v3
