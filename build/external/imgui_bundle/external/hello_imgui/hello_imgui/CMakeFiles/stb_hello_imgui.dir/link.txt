@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc libstb_hello_imgui.a CMakeFiles/stb_hello_imgui.dir/external/stb_hello_imgui/stb_impl_hello_imgui.cpp.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib libstb_hello_imgui.a

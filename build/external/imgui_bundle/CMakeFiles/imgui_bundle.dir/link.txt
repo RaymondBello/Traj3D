@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc libimgui_bundle.a CMakeFiles/imgui_bundle.dir/src/imgui_bundle/imgui_bundle.cpp.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib libimgui_bundle.a

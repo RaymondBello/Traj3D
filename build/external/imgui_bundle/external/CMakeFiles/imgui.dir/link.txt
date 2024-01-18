@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc libimgui.a CMakeFiles/imgui.dir/imgui/imgui/imgui.cpp.o CMakeFiles/imgui.dir/imgui/imgui/imgui_demo.cpp.o CMakeFiles/imgui.dir/imgui/imgui/imgui_draw.cpp.o CMakeFiles/imgui.dir/imgui/imgui/imgui_tables.cpp.o CMakeFiles/imgui.dir/imgui/imgui/imgui_widgets.cpp.o CMakeFiles/imgui.dir/imgui/imgui/misc/cpp/imgui_stdlib.cpp.o CMakeFiles/imgui.dir/imgui/imgui/misc/freetype/imgui_freetype.cpp.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib libimgui.a

@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc libimgui_knobs.a "CMakeFiles/imgui_knobs.dir/imgui-knobs/imgui-knobs/imgui-knobs.cpp.o"
-/Library/Developer/CommandLineTools/usr/bin/ranlib libimgui_knobs.a
