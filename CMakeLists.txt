@@ -34,6 +34,9 @@ if (APPLE)
     target_link_libraries(TrajectorySim PRIVATE "-framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo")
 endif()
 
+if (UNIX)
+    target_link_libraries(TrajectorySim PRIVATE "-ldraw")
+endif()
 
 
 # imgui_bundle_add_app is a helper function, similar to cmake's "add_executable"
