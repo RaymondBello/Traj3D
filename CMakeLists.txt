@@ -29,7 +29,6 @@ imgui_bundle_add_app(TrajectorySim ${APP_SOURCES})
 include_directories(include/)
 
 if (APPLE)
-    target_link_libraries(TrajectorySim PRIVATE "-framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo")
 endif()
 
 if (UNIX)
@@ -37,6 +36,14 @@ if (UNIX)
     target_link_libraries(TrajectorySim PRIVATE ${OPENGL_LIBRARY})
 endif()
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_libraries(TrajectorySim PRIVATE "-framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+	message("You're on Linux, do nothing!")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(TrajectorySim PRIVATE ${OPENGL_LIBRARY})
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 # Now you can build your app with
 #     mkdir build && cd build && cmake .. && cmake --build .
