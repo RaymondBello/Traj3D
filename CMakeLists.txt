@@ -33,8 +33,8 @@ if (APPLE)
 endif()
 
 if (UNIX)
-    # target_link_libraries(TrajectorySim PRIVATE "-ldraw")
-    # target_link_libraries(TrajectorySim PRIVATE "-ldraw" ${CMAKE_DL_LIBS})
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(TrajectorySim PRIVATE ${OPENGL_LIBRARY})
 endif()
 
 
