@@ -1,4 +1,3 @@
-#define GL_SILENCE_DEPRECATION
 
 #include <stdio.h>
 #include "Application.h"
