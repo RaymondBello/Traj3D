@@ -2,10 +2,7 @@
 
 #include "hello_imgui/hello_imgui.h"
 #include "imgui.h"
-#include "imgui/backends/imgui_impl_glfw.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
 #include <stdio.h>
-#include <GLFW/glfw3.h>
 #include "imgui/misc/cpp/imgui_stdlib.h"
 #include "imgui_internal.h"
 #include "immapp/immapp.h"
@@ -13,6 +10,8 @@
 
 #include "ApplicationSettings.h"
 #include "ParameterUIState.h"
+
+#include "RenderEngine.h"
 
 class ParameterUI
 {
@@ -28,6 +27,10 @@ private:
 
     ImFont *ui_font = nullptr;
 
+    // Render Engine
+    RenderEngine m_renderer;
+
+
 public:
     int buffer_size = 1000;
     bool inspector_id_selected = true;
@@ -39,14 +42,26 @@ public:
     ParameterUI(AppSettings settings);
     ~ParameterUI();
 
+    // Methods
     void initialize();
+
+    // Callbacks
     void load_font(AppSettings settings);
     void status_bar();
     void show_menu();
+
+    // Window callbacks
     void create_inspector(AppSettings &settings);
+    void create_plots();
+    void create_scene();
+    void create_hierarchy();
+
+    // Layout & Docking
     HelloImGui::DockingParams create_layout();
     std::vector<HelloImGui::DockingSplit> create_docking_splits();
     std::vector<HelloImGui::DockableWindow> create_docking_windows(AppSettings &settings);
+
+    // Main Loop
     void start_event_loop();
 };
 

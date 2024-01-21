@@ -24,9 +24,9 @@ file(GLOB_RECURSE APP_SOURCES "src/*.cpp")
 file(GLOB_RECURSE APP_HEADERS "include/*.h")
 
 
+imgui_bundle_add_app(TrajectorySim ${APP_SOURCES})
 
-
-imgui_bundle_add_app(TrajectorySim ${APP_HEADERS} ${APP_SOURCES})
+include_directories(include/)
 
 if (APPLE)
     target_link_libraries(TrajectorySim PRIVATE "-framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo")
