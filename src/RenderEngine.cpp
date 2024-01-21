@@ -91,7 +91,7 @@ void RenderEngine::init_resources()
     }
     IM_ASSERT(glErrorCount == 0);
 
-
+    // New 
 
 }
 
