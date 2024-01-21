@@ -42,7 +42,10 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	message("You're on Linux, do nothing!")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     find_package(OpenGL REQUIRED)
-    target_link_libraries(TrajectorySim PRIVATE ${OPENGL_LIBRARY})
+    message("include dir: ${OPENGL_INCLUDE_DIR}")
+    message("link libraries(new): ${OPENGL_gl_LIBRARY}")
+    message("link libraries(old): ${OPENGL_LIBRARY}")
+    target_link_libraries(TrajectorySim ${OPENGL_LIBRARY})
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 # Now you can build your app with
