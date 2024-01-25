@@ -2,29 +2,35 @@
 #include "hello_imgui/hello_imgui.h"
 #include "imgui.h"
 #include "imgui_internal.h"
-#include "imgui/backends/imgui_impl_glfw.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
-#include <GLFW/glfw3.h>
+
+// #include <GLFW/glfw3.h>
+// #include "imgui/backends/imgui_impl_glfw.h"
+// #include "imgui/backends/imgui_impl_opengl3_loader.h"
+// #include "imgui/backends/imgui_impl_opengl3.h"
+
+#include "hello_imgui/hello_imgui_include_opengl.h"
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <unordered_map> // for UniformsList
-
-
-
+// #include <OpenGL/gltypes.h>
 
 class RenderEngine
 {
 private:
     /* data */
-    const char *m_vert_shader;
-    const char *m_frag_shader;
-
-    GLuint m_shader_program;
-    GLuint m_quad_vao;
+    std::string m_vert_shader;
+    std::string m_frag_shader;
 
 public:
+    GLuint m_vao;
+    GLuint m_vbo;
+    GLuint m_fbo;
+    GLuint m_rbo;
+    GLuint m_texture_id;
+    GLuint m_shader_program;
+
     RenderEngine(/* args */);
     ~RenderEngine();
 

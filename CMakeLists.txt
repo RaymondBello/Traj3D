@@ -38,7 +38,7 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     find_package(OpenGL REQUIRED)
     # find_package(glfw3 3.2 REQUIRED)
     # target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_LIBRARY})
+    target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 # Now you can build your app with

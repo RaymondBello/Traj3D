@@ -77,9 +77,16 @@ void RenderEngine::init_resources()
         IM_ASSERT(is_linked);
     }
 
+    // Validate shader
+    // glValidateProgram(shader);
+    // glGetProgramiv(shader, GL_VALIDATE_STATUS, &result);
+
+    this->m_shader_program = shader_program;
+
     // Delete shader objects
     glDeleteShader(v_shader);
     glDeleteShader(f_shader);
+
 
     // Check for any openGL errors
     int glErrorCount = 0;
@@ -91,8 +98,105 @@ void RenderEngine::init_resources()
     }
     IM_ASSERT(glErrorCount == 0);
 
-    // New 
+    //####################################################
+    //  Create the Framebuffer (OLD)
+    //####################################################
+    // // Create Framebuffer QuadVAO
+    // // Define the vertex data for a full-screen quad
+    // float vertices[] = {
+    //     // positions   // texCoords
+    //     -1.0f, -1.0f, 0.0f, 0.0f, // bottom left  (0)
+    //     1.0f, -1.0f, 1.0f, 0.0f,  // bottom right (1)
+    //     -1.0f, 1.0f, 0.0f, 1.0f,  // top left     (2)
+    //     1.0f, 1.0f, 1.0f, 1.0f    // top right    (3)
+    // };
+    // // Generate and bind the VAO
+    // GLuint vao;
+    // glGenVertexArrays(1, &vao);
+    // glBindVertexArray(vao);
 
+    // // Generate and bind the VBO
+    // GLuint vbo;
+    // glGenBuffers(1, &vbo);
+    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    // // Fill the VBO with vertex data
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // // Set the vertex attribute pointers
+    // // Position attribute
+    // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+    // glEnableVertexAttribArray(0);
+    // // Texture coordinate attribute
+    // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+    // glEnableVertexAttribArray(1);
+
+    // // Unbind the VAO (and VBO)
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindVertexArray(0);
+
+    //####################################################
+    //   Create the Framebuffer 
+    //####################################################
+    float vertices[] = {
+        -1.0f, -1.0f, 0.0f, // 1. vertex x, y, z
+        1.0f, -1.0f, 0.0f,  // 2. vertex x, y, z
+        0.0f, 1.0f, 0.0f    // 3. vertex x, y, z
+    };
+
+    // Vertex Array Obj
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    // Vertex Buffer Obj
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // FrameBuffer & RenderBuffer Obj
+    GLuint fbo, rbo, texture_id;
+    const GLint WIDTH = 200;
+    const GLint HEIGHT = 200;
+
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
+
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        HelloImGui::Log(HelloImGui::LogLevel::Error, "ERROR: Framebuffer is not complete!\n");
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    this->m_vao = vao;
+    this->m_vbo = vbo;
+
+    this->m_fbo = fbo;
+    this->m_rbo = rbo;
+    this->m_texture_id = texture_id;
 }
 
 void RenderEngine::destroy_resources()

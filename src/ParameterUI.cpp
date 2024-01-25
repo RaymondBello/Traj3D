@@ -75,10 +75,10 @@ void ParameterUI::initialize()
     this->runner_params.dockingParams = create_layout();
 
     // PostInit & BeforeExit callbacks
-    runner_params.callbacks.PostInit = [&, this]()
-    { m_renderer.init_resources(); };
-    runner_params.callbacks.BeforeExit = [&]()
-    { m_renderer.destroy_resources(); };
+    // runner_params.callbacks.PostInit = [&, this]()
+    // { m_renderer.init_resources(); };
+    // runner_params.callbacks.BeforeExit = [&]()
+    // { m_renderer.destroy_resources(); };
 
     // Add save location
     this->runner_params.iniFolderType = HelloImGui::IniFolderType::AppUserConfigFolder;
@@ -117,10 +117,10 @@ std::vector<HelloImGui::DockingSplit> ParameterUI::create_docking_splits()
     inspector_split.ratio = 0.25f;
 
     HelloImGui::DockingSplit logs_split;
-    logs_split.initialDock = "MainDockSpace";
+    logs_split.initialDock = "Inspector";
     logs_split.newDock = "Logs";
     logs_split.direction = ImGuiDir_Down;
-    logs_split.ratio = 0.25f;
+    logs_split.ratio = 0.2f;
 
     HelloImGui::DockingSplit scene_split;
     scene_split.initialDock = "MainDockSpace";
@@ -146,19 +146,27 @@ std::vector<HelloImGui::DockableWindow> ParameterUI::create_docking_windows(AppS
     w_inspector.GuiFunction = [&]
     { create_inspector(settings); };
 
+    // Node Hierarchy
+    HelloImGui::DockableWindow w_hierarchy;
+    w_hierarchy.label = ICON_FA_SITEMAP " Hierarchy";
+    w_hierarchy.dockSpaceName = "Scene";
+    w_hierarchy.GuiFunction = [&]
+    { create_hierarchy(); };
+
+    // Scene View
+    // HelloImGui::DockableWindow w_scene;
+    // w_scene.label = ICON_FA_IMAGE " Scene";
+    // w_scene.dockSpaceName = "MainDockSpace";
+    // w_scene.GuiFunction = [&]
+    // { create_scene(); };
+
     // Plots
     HelloImGui::DockableWindow w_plots;
     w_plots.label = ICON_FA_CHART_AREA " Plots";
-    w_plots.dockSpaceName = "MainDockSpace";
+    w_plots.dockSpaceName = "Scene";
     w_plots.GuiFunction = [&]
     { create_plots(); };
 
-    // Scene View
-    HelloImGui::DockableWindow w_scene;
-    w_scene.label = ICON_FA_IMAGE " Scene";
-    w_scene.dockSpaceName = "MainDockSpace";
-    w_scene.GuiFunction = [&]
-    { create_scene(); };
 
     // Logger
     HelloImGui::DockableWindow w_logger;
@@ -167,20 +175,13 @@ std::vector<HelloImGui::DockableWindow> ParameterUI::create_docking_windows(AppS
     w_logger.GuiFunction = []
     { HelloImGui::LogGui(); };
 
-    // Node Hierarchy
-    HelloImGui::DockableWindow w_hierarchy;
-    w_hierarchy.label = ICON_FA_SITEMAP " Hierarchy";
-    w_hierarchy.dockSpaceName = "Scene";
-    w_hierarchy.GuiFunction = [&]
-    { create_hierarchy(); };
-
     std::vector<HelloImGui::DockableWindow>
         dockableWindows{
             w_inspector,
-            w_scene,
+            w_hierarchy,
+            // w_scene,
             w_plots,
-            w_logger,
-            w_hierarchy};
+            w_logger};
 
     return dockableWindows;
 }
@@ -191,14 +192,66 @@ void ParameterUI::create_hierarchy()
 
 void ParameterUI::create_scene()
 {
+    ImGui::BeginChild("Scene");
     ImGui::Text("Scene Framebuffer");
 
     float w_width = ImGui::GetContentRegionAvail().x;
     float w_height = ImGui::GetContentRegionAvail().y;
 
-    // printf("width:%0f, height:%0f\n", w_width, w_height);
+    printf("width:%0f, height:%0f\n", w_width, w_height);
+
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    printf("screen x:%0f, y:%0f\n", pos.x, pos.y);
+
+    // Check variables
+    // printf("Render class m_shader: 0x%0x\n", m_renderer.m_shader_program);
+    // printf("Render class m_vao: 0x%0x\n", m_renderer.m_vao);
+    // printf("Render class m_vbo: 0x%0x\n", m_renderer.m_vbo);
+    // printf("Render class m_fbo: 0x%0x\n", m_renderer.m_fbo);
+    // printf("Render class m_texture_id: 0x%0x\n", m_renderer.m_texture_id);
+
+    // Rescale framebuffer
+    // glEnable(GL_DEPTH_TEST);
+    glBindTexture(GL_TEXTURE_2D, m_renderer.m_texture_id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w_width, w_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_renderer.m_texture_id, 0);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, m_renderer.m_rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w_width, w_height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderer.m_rbo);
+
+    // Update Viewport
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glViewport(0, 0, w_width, w_height);
+
+    ImGui::GetWindowDrawList()->AddImage(
+        // (void *)m_renderer.m_texture_id,
+        reinterpret_cast<GLuint *>(m_renderer.m_texture_id),
+        ImVec2(pos.x, pos.y),
+        ImVec2(pos.x + w_width, pos.y + w_height),
+        ImVec2(0, 1),
+        ImVec2(1, 0));
 
 
+    // Drawing the triangle to the screen
+    // Step 1: Bind the Framebuffer object
+    glBindFramebuffer(GL_FRAMEBUFFER, m_renderer.m_fbo);
+    // Step 2: Enable the shader program
+    glUseProgram(m_renderer.m_fbo);
+    // Step 3: Bind the Vertex Array Object
+    glBindVertexArray(m_renderer.m_vao);
+    // Step 4: Draw the triangle
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    // Step 5: Unbind the Vertex Array Object
+    glBindVertexArray(0);
+    // Step 6: Disable the shader program
+    glUseProgram(0);
+    // Step 7: Unbind the Framebuffer object
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    ImGui::EndChild();
 }
 
 void ParameterUI::create_plots()
@@ -221,7 +274,13 @@ void ParameterUI::create_plots()
 
 void ParameterUI::create_inspector(AppSettings &settings)
 {
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 0.0f, 0.5f, 0.0f)); // Set window background to red
+    ImGui::BeginChild("Empty");
+    ImGui::PopStyleColor();
     ImGui::Text("Inspector");
+    
+
+    ImGui::EndChild();
 }
 
 void ParameterUI::show_menu()
