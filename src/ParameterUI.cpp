@@ -74,7 +74,11 @@ void ParameterUI::initialize()
     this->runner_params.imGuiWindowParams.enableViewports = true;
     this->runner_params.dockingParams = create_layout();
 
+    // ###############################
     // PostInit & BeforeExit callbacks
+    // #####################################################
+    // FIXME: Update reading shaders from assets directory
+    // #####################################################
     // runner_params.callbacks.PostInit = [&, this]()
     // { m_renderer.init_resources(); };
     // runner_params.callbacks.BeforeExit = [&]()
