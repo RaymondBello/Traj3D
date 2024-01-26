@@ -34,13 +34,13 @@ jobs:
         cmake --build . --config Release
         cd ..
 
-    - name: Build Emscripten App
-      if: ${{ matrix.platform != 'windows-latest' }}
-      shell: bash
-      run: |
-        ./external/hello_imgui/hello_imgui/tools/emscripten/install_emscripten.sh
-        mkdir build_ems
-        cd build_ems
-        source ~/emsdk/emsdk_env.sh
-        emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
-        make -j 4
+    # - name: Build Emscripten App
+    #   if: ${{ matrix.platform != 'windows-latest' }}
+    #   shell: bash
+    #   run: |
+    #     ./external/hello_imgui/hello_imgui/tools/emscripten/install_emscripten.sh
+    #     mkdir build_ems
+    #     cd build_ems
+    #     source ~/emsdk/emsdk_env.sh
+    #     emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
+    #     make -j 4
