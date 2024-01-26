@@ -22,16 +22,25 @@ jobs:
       with:
         submodules: true
 
-#    - name: Setup interactive tmate session
-#      uses: mxschmitt/action-tmate@v3
-
     - name: apt install xorg-dev  libglfw3-dev (ubuntu only)
       if: ${{ matrix.platform == 'ubuntu-latest' }}
       run: sudo apt-get update && sudo apt-get install -y xorg-dev  libglfw3-dev
 
-    - name: Build
+    - name: Build Desktop App
       run: |
         mkdir build 
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release -DHELLOIMGUI_DOWNLOAD_FREETYPE_IF_NEEDED=ON
         cmake --build . --config Release
+        cd ..
+
+    - name: Build Emscripten App
+      if: ${{ matrix.platform != 'windows-latest' }}
+      shell: bash
+      run: |
+        ./external/hello_imgui/hello_imgui/tools/emscripten/install_emscripten.sh
+        mkdir build_ems
+        cd build_ems
+        source ~/emsdk/emsdk_env.sh
+        emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
+        make -j 4
