@@ -3,6 +3,9 @@ project(TrajectorySim)
 set(CMAKE_CXX_STANDARD 17)
 
 
+# ==============
+# Add ImGui
+# ==============
 # 1/  Option 1: if you added imgui_bundle in a subfolder, you can add it to your project with:
 if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui_bundle)
     add_subdirectory(external/imgui_bundle)
@@ -18,6 +21,18 @@ if (NOT TARGET imgui_bundle)
 
 endif()
 
+
+# ==============
+# Add Math & Utility Libraries
+# ==============
+add_subdirectory(lib/glm)
+# add_subdirectory(lib/stb)
+# add_subdirectory(lib/assimp)
+
+
+
+
+# ==============
 # Build your app
 # ==============
 file(GLOB_RECURSE APP_SOURCES "src/*.cpp")
@@ -27,6 +42,10 @@ file(GLOB_RECURSE APP_HEADERS "include/*.h")
 imgui_bundle_add_app(${PROJECT_NAME} ${APP_SOURCES})
 
 include_directories(include/)
+
+# Include Math & utility libraries
+target_link_libraries(${PROJECT_NAME} PRIVATE glm)
+
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_compile_definitions(${PROJECT_NAME} PRIVATE GL_SILENCE_DEPRECATION)

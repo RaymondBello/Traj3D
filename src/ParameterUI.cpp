@@ -79,10 +79,16 @@ void ParameterUI::initialize()
     // #####################################################
     // FIXME: Update reading shaders from assets directory
     // #####################################################
-    // runner_params.callbacks.PostInit = [&, this]()
-    // { m_renderer.init_resources(); };
+    runner_params.callbacks.PostInit = [&, this]()
+    { m_renderer.initialize(); };
     // runner_params.callbacks.BeforeExit = [&]()
     // { m_renderer.destroy_resources(); };
+
+    // #####################################################
+    // Custom background
+    // #####################################################
+    runner_params.callbacks.CustomBackground = [&, this]()
+    { m_renderer.render(); };
 
     // Add save location
     this->runner_params.iniFolderType = HelloImGui::IniFolderType::AppUserConfigFolder;
@@ -118,7 +124,7 @@ std::vector<HelloImGui::DockingSplit> ParameterUI::create_docking_splits()
     inspector_split.initialDock = "MainDockSpace";
     inspector_split.newDock = "Inspector";
     inspector_split.direction = ImGuiDir_Left;
-    inspector_split.ratio = 0.25f;
+    inspector_split.ratio = 0.2f;
 
     HelloImGui::DockingSplit logs_split;
     logs_split.initialDock = "Inspector";
@@ -130,7 +136,7 @@ std::vector<HelloImGui::DockingSplit> ParameterUI::create_docking_splits()
     scene_split.initialDock = "MainDockSpace";
     scene_split.newDock = "Scene";
     scene_split.direction = ImGuiDir_Right;
-    scene_split.ratio = 0.3f;
+    scene_split.ratio = 0.25f;
 
     std::vector<HelloImGui::DockingSplit> splits{
         inspector_split,

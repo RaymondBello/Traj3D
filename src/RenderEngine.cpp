@@ -1,5 +1,14 @@
 #include "RenderEngine.h"
 
+std::string get_assets_folder()
+{
+#ifndef __EMSCRIPTEN__
+    return "assets/";
+#else
+    return "/";
+#endif
+}
+
 RenderEngine::RenderEngine(/* args */)
 {
 
@@ -12,24 +21,78 @@ RenderEngine::~RenderEngine()
 {
 }
 
-void RenderEngine::init_resources()
+void RenderEngine::chdir_beside_assets_folder()
 {
+    auto find_assets = [](const std::filesystem::path &path) -> bool
+    {
+        std::filesystem::path candidateAssetsFolder = path / get_assets_folder();
+        if (std::filesystem::is_directory(candidateAssetsFolder))
+        {
+            // chdir to the assets folder parent
+            std::filesystem::current_path(path);
+            if (!std::filesystem::is_directory(get_assets_folder()))
+                throw std::runtime_error("ChdirBesideAssetsFolder => fail setting path");
+            HelloImGui::SetAssetsFolder(get_assets_folder());
+            return true;
+        }
+        else
+            return false;
+    };
 
-    //####################################################
-    // Create the shader program
-    //####################################################
-    HelloImGui::Log(HelloImGui::LogLevel::Info, "Initializing OpenGL version: %s\n", glGetString(GL_VERSION));
+    // 1. Try to find demo assets in current folder
+    const auto &currentPath = std::filesystem::current_path();
+    if (find_assets(currentPath))
+        return;
+
+    // 2. Try to find demo assets in current folder parent
+    if (find_assets(currentPath.parent_path()))
+        return;
+
+#ifdef HELLOIMGUI_INSIDE_APPLE_BUNDLE
+    {
+        std::filesystem::path exeFolder(wai_getExecutableFolder_string());
+        auto apps_bundles_path = exeFolder.parent_path().parent_path().parent_path();
+
+        if (find_assets(apps_bundles_path))
+            return;
+    };
+#endif
+
+#ifndef __EMSCRIPTEN__
+    // 3. Try to find demo assets in exe folder
+    {
+        std::filesystem::path exeFolder(wai_getExecutableFolder_string());
+        if (find_assets(exeFolder))
+            return;
+        // 4. Try to find demo assets in exe folder parent (for MSVC Debug/ and Release/ folders)
+        if (find_assets(exeFolder.parent_path()))
+            return;
+    }
+#endif
+
+    HelloImGui::Log(HelloImGui::LogLevel::Info, "Could not find %s folder\n", get_assets_folder().c_str());
+}
+
+void RenderEngine::initialize()
+{
+    // First step is not find assets folder
+    chdir_beside_assets_folder();
 
     std::string shader_vert_src;
     std::string shader_frag_src;
 
-    shader_vert_src = get_shader_from_file("TrajectorySim.app/Contents/Resources/assets/shaders/shader.vert");
-    shader_frag_src = get_shader_from_file("TrajectorySim.app/Contents/Resources/assets/shaders/shader.frag");
+    std::string path = "/";
+    for (const auto &entry : std::filesystem::directory_iterator(path))
+        std::cout << entry.path() << std::endl;
 
-    // HelloImGui::Log(HelloImGui::LogLevel::Info, "Vertex shader: %s\n", shader_vert_src.c_str());
-    // HelloImGui::Log(HelloImGui::LogLevel::Info, "Fragment shader: %s\n", shader_frag_src.c_str());
-    
-    // Compile vertex shader 
+    // Print out the current working directory
+    std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
+
+    // Create shader program
+    shader_vert_src = get_shader_from_file(get_assets_folder() + "shaders/shader.vert");
+    shader_frag_src = get_shader_from_file(get_assets_folder() + "shaders/shader.frag");
+
+    // Compile vertex shader
     GLuint v_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(v_shader, 1, reinterpret_cast<const GLchar *const *>(&shader_vert_src), NULL);
     glCompileShader(v_shader);
@@ -45,7 +108,7 @@ void RenderEngine::init_resources()
         IM_ASSERT(v_shader_status);
     }
 
-    // Compile fragment shader 
+    // Compile fragment shader
     GLuint f_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(f_shader, 1, reinterpret_cast<const GLchar *const *>(&shader_frag_src), NULL);
     glCompileShader(f_shader);
@@ -70,7 +133,8 @@ void RenderEngine::init_resources()
     // Check for link errors
     GLint is_linked;
     glGetProgramiv(shader_program, GL_LINK_STATUS, &is_linked);
-    if (!is_linked) {
+    if (!is_linked)
+    {
         GLchar link_log[512];
         glGetProgramInfoLog(shader_program, 512, NULL, link_log);
         HelloImGui::Log(HelloImGui::LogLevel::Error, "Shader program linking failed \n%s", link_log);
@@ -87,7 +151,6 @@ void RenderEngine::init_resources()
     glDeleteShader(v_shader);
     glDeleteShader(f_shader);
 
-
     // Check for any openGL errors
     int glErrorCount = 0;
     GLenum err;
@@ -98,22 +161,80 @@ void RenderEngine::init_resources()
     }
     IM_ASSERT(glErrorCount == 0);
 
-    //####################################################
-    //  Create the Framebuffer (OLD)
-    //####################################################
-    // // Create Framebuffer QuadVAO
-    // // Define the vertex data for a full-screen quad
-    // float vertices[] = {
-    //     // positions   // texCoords
-    //     -1.0f, -1.0f, 0.0f, 0.0f, // bottom left  (0)
-    //     1.0f, -1.0f, 1.0f, 0.0f,  // bottom right (1)
-    //     -1.0f, 1.0f, 0.0f, 1.0f,  // top left     (2)
-    //     1.0f, 1.0f, 1.0f, 1.0f    // top right    (3)
-    // };
-    // // Generate and bind the VAO
-    // GLuint vao;
-    // glGenVertexArrays(1, &vao);
-    // glBindVertexArray(vao);
+    // Add Uniforms
+    // Uniforms.AddUniform("BG_COLOR", MyVec3{0.8f, 0.9f, 0.6f});
+
+    // Create vertex
+    // Define the vertex data for a full-screen quad
+    // Vertices coordinates
+    GLfloat vertices[] =
+        {
+            -0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,  // Lower left corner
+            0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,   // Lower right corner
+            0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f // Upper corner
+        };
+
+    // Create reference containers for the Vartex Array Object and the Vertex Buffer Object
+    GLuint VAO, VBO;
+
+    // Generate the VAO and VBO with only 1 object each
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    // Make the VAO the current Vertex Array Object by binding it
+    glBindVertexArray(VAO);
+
+    // Bind the VBO specifying it's a GL_ARRAY_BUFFER
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // Introduce the vertices into the VBO
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Configure the Vertex Attribute so that OpenGL knows how to read the VBO
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    // Enable the Vertex Attribute so that OpenGL knows to use it
+    glEnableVertexAttribArray(0);
+
+    // Bind both the VBO and VAO to 0 so that we don't accidentally modify the VAO and VBO we created
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    this->m_vao = VAO;
+    this->m_vbo = VBO;
+}
+
+void RenderEngine::init_resources()
+{
+
+    // ####################################################
+    //  Create the shader program
+    // ####################################################
+    HelloImGui::Log(HelloImGui::LogLevel::Info, "Initializing OpenGL version: %s\n", glGetString(GL_VERSION));
+
+    std::string shader_vert_src;
+    std::string shader_frag_src;
+
+    // shader_vert_src = get_shader_from_file("TrajectorySim.app/Contents/Resources/assets/shaders/shader.vert");
+    // shader_frag_src = get_shader_from_file("TrajectorySim.app/Contents/Resources/assets/shaders/shader.frag");
+
+    // HelloImGui::Log(HelloImGui::LogLevel::Info, "Vertex shader: %s\n", shader_vert_src.c_str());
+    // HelloImGui::Log(HelloImGui::LogLevel::Info, "Fragment shader: %s\n", shader_frag_src.c_str());
+
+    // ####################################################
+    //   Create the Framebuffer (OLD)
+    // ####################################################
+    //  // Create Framebuffer QuadVAO
+    //  // Define the vertex data for a full-screen quad
+    //  float vertices[] = {
+    //      // positions   // texCoords
+    //      -1.0f, -1.0f, 0.0f, 0.0f, // bottom left  (0)
+    //      1.0f, -1.0f, 1.0f, 0.0f,  // bottom right (1)
+    //      -1.0f, 1.0f, 0.0f, 1.0f,  // top left     (2)
+    //      1.0f, 1.0f, 1.0f, 1.0f    // top right    (3)
+    //  };
+    //  // Generate and bind the VAO
+    //  GLuint vao;
+    //  glGenVertexArrays(1, &vao);
+    //  glBindVertexArray(vao);
 
     // // Generate and bind the VBO
     // GLuint vbo;
@@ -135,9 +256,9 @@ void RenderEngine::init_resources()
     // glBindBuffer(GL_ARRAY_BUFFER, 0);
     // glBindVertexArray(0);
 
-    //####################################################
-    //   Create the Framebuffer 
-    //####################################################
+    // ####################################################
+    //    Create the Framebuffer
+    // ####################################################
     float vertices[] = {
         -1.0f, -1.0f, 0.0f, // 1. vertex x, y, z
         1.0f, -1.0f, 0.0f,  // 2. vertex x, y, z
@@ -197,6 +318,31 @@ void RenderEngine::init_resources()
     this->m_fbo = fbo;
     this->m_rbo = rbo;
     this->m_texture_id = texture_id;
+}
+
+void RenderEngine::render()
+{
+    // ####################################################
+    //  Create the shader program
+    // ####################################################
+    // HelloImGui::Log(HelloImGui::LogLevel::Info, "Initializing Renderer. OpenGL version: %s\n", glGetString(GL_VERSION));
+
+    auto &io = ImGui::GetIO();
+    auto r = ImVec2(io.DisplaySize.x * io.DisplayFramebufferScale.x,
+                    io.DisplaySize.y * io.DisplayFramebufferScale.y);
+
+    ImVec2 displaySize = r;
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glViewport(0, 0, (GLsizei)displaySize.x, (GLsizei)displaySize.y);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(m_shader_program);
+    glBindVertexArray(m_vao);
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    glBindVertexArray(0); // Unbind the VAO
+    glUseProgram(0);      // Unbind the shader program
 }
 
 void RenderEngine::destroy_resources()

@@ -630,7 +630,7 @@ void Gui(AppState &appState)
 
 int main(int, char *[])
 {
-    // ChdirBesideAssetsFolder();
+    ChdirBesideAssetsFolder();
 
     // Our global app state
     AppState appState;
