@@ -83,7 +83,6 @@ void RenderEngine::initialize()
 
     // Print out the current working directory
 //    std::string filepath = std::filesystem::current_path().string();
-//    HelloImGui::Log(HelloImGui::LogLevel::Info, "Current Working directory %s", filepath.c_str());
 
     // Create shader program
     shader_vert_src = get_shader_from_file(get_assets_folder() + "shaders/shader.vert");
