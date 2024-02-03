@@ -76,7 +76,6 @@ public:
     // Methods
     void initialize();
     void init_resources();
-    void chdir_beside_assets_folder();
     void render();
     void destroy_resources();
     std::string get_shader_from_file(std::string file);

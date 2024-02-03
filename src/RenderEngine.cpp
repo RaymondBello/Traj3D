@@ -21,68 +21,13 @@ RenderEngine::~RenderEngine()
 {
 }
 
-void RenderEngine::chdir_beside_assets_folder()
-{
-    auto find_assets = [](const std::filesystem::path &path) -> bool
-    {
-        std::filesystem::path candidateAssetsFolder = path / get_assets_folder();
-        if (std::filesystem::is_directory(candidateAssetsFolder))
-        {
-            // chdir to the assets folder parent
-            std::filesystem::current_path(path);
-            if (!std::filesystem::is_directory(get_assets_folder()))
-                throw std::runtime_error("ChdirBesideAssetsFolder => fail setting path");
-            HelloImGui::SetAssetsFolder(get_assets_folder());
-            return true;
-        }
-        else
-            return false;
-    };
-
-    // 1. Try to find demo assets in current folder
-    const auto &currentPath = std::filesystem::current_path();
-    if (find_assets(currentPath))
-        return;
-
-    // 2. Try to find demo assets in current folder parent
-    if (find_assets(currentPath.parent_path()))
-        return;
-
-#ifdef HELLOIMGUI_INSIDE_APPLE_BUNDLE
-    {
-        std::filesystem::path exeFolder(wai_getExecutableFolder_string());
-        auto apps_bundles_path = exeFolder.parent_path().parent_path().parent_path();
-
-        if (find_assets(apps_bundles_path))
-            return;
-    };
-#endif
-
-#ifndef __EMSCRIPTEN__
-    // 3. Try to find demo assets in exe folder
-    {
-        std::filesystem::path exeFolder(wai_getExecutableFolder_string());
-        if (find_assets(exeFolder))
-            return;
-        // 4. Try to find demo assets in exe folder parent (for MSVC Debug/ and Release/ folders)
-        if (find_assets(exeFolder.parent_path()))
-            return;
-    }
-#endif
-
-    HelloImGui::Log(HelloImGui::LogLevel::Info, "Could not find %s folder\n", get_assets_folder().c_str());
-}
-
 void RenderEngine::initialize()
 {
-    // First step is not find assets folder
-//    chdir_beside_assets_folder();
 
+    // Initialize shader source
     std::string shader_vert_src;
     std::string shader_frag_src;
 
-    // Print out the current working directory
-//    std::string filepath = std::filesystem::current_path().string();
 
     // Create shader program
     shader_vert_src = get_shader_from_file(get_assets_folder() + "shaders/shader.vert");
