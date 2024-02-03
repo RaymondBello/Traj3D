@@ -76,7 +76,7 @@ void RenderEngine::chdir_beside_assets_folder()
 void RenderEngine::initialize()
 {
     // First step is not find assets folder
-    chdir_beside_assets_folder();
+//    chdir_beside_assets_folder();
 
     std::string shader_vert_src;
     std::string shader_frag_src;
