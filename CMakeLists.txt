@@ -62,3 +62,9 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 # Now you can build your app with
 #     mkdir build && cd build && cmake .. && cmake --build .
+
+# Build with emscripten
+#     emcmake cmake ..
+#     make -j4
+#     emrun --browser chrome TrajectorySim.html
+

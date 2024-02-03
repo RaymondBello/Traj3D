@@ -2,6 +2,7 @@
 *.ini
 .vscode/
 build/
-__pycache__/
+build_em/
 build_emscripten/
+__pycache__/
 xcode/
