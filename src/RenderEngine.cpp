@@ -81,16 +81,15 @@ void RenderEngine::initialize()
     std::string shader_vert_src;
     std::string shader_frag_src;
 
-    std::string path = "/";
-    for (const auto &entry : std::filesystem::directory_iterator(path))
-        std::cout << entry.path() << std::endl;
-
     // Print out the current working directory
-    std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
+    std::string filepath = std::filesystem::current_path().string();
+    
+    HelloImGui::Log(HelloImGui::LogLevel::Info, "Current Working directory %s", filepath.c_str());
 
     // Create shader program
     shader_vert_src = get_shader_from_file(get_assets_folder() + "shaders/shader.vert");
     shader_frag_src = get_shader_from_file(get_assets_folder() + "shaders/shader.frag");
+    
 
     // Compile vertex shader
     GLuint v_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -105,7 +104,7 @@ void RenderEngine::initialize()
         GLchar info_log[512];
         glGetShaderInfoLog(v_shader, 512, NULL, info_log);
         HelloImGui::Log(HelloImGui::LogLevel::Error, "Vertex shader compile failed \n%s", info_log);
-        IM_ASSERT(v_shader_status);
+//        IM_ASSERT(v_shader_status);
     }
 
     // Compile fragment shader
@@ -121,7 +120,7 @@ void RenderEngine::initialize()
         GLchar frag_log[512];
         glGetShaderInfoLog(f_shader, 512, NULL, frag_log);
         HelloImGui::Log(HelloImGui::LogLevel::Error, "Fragment shader compile failed \n%s", frag_log);
-        IM_ASSERT(f_shader_status);
+//        IM_ASSERT(f_shader_status);
     }
 
     // Create shader program
@@ -138,7 +137,7 @@ void RenderEngine::initialize()
         GLchar link_log[512];
         glGetProgramInfoLog(shader_program, 512, NULL, link_log);
         HelloImGui::Log(HelloImGui::LogLevel::Error, "Shader program linking failed \n%s", link_log);
-        IM_ASSERT(is_linked);
+//        IM_ASSERT(is_linked);
     }
 
     // Validate shader
@@ -159,7 +158,7 @@ void RenderEngine::initialize()
         HelloImGui::Log(HelloImGui::LogLevel::Error, "OpenGL error: %0d\n", err);
         ++glErrorCount;
     }
-    IM_ASSERT(glErrorCount == 0);
+//    IM_ASSERT(glErrorCount == 0);
 
     // Add Uniforms
     // Uniforms.AddUniform("BG_COLOR", MyVec3{0.8f, 0.9f, 0.6f});

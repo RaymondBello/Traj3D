@@ -130,7 +130,7 @@ std::vector<HelloImGui::DockingSplit> ParameterUI::create_docking_splits()
     logs_split.initialDock = "Inspector";
     logs_split.newDock = "Logs";
     logs_split.direction = ImGuiDir_Down;
-    logs_split.ratio = 0.2f;
+    logs_split.ratio = 0.35f;
 
     HelloImGui::DockingSplit scene_split;
     scene_split.initialDock = "MainDockSpace";
