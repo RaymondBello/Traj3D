@@ -10,11 +10,10 @@
 #include <entt/entt.hpp>
 
 // Components
-#include <CameraComponent.h>
-#include <MeshComponent.h>
+#include <Components.h>
 
 // Systems
-#include <MeshSystem.h>
+#include <Systems.h>
 
 std::string get_assets_dir()
 {
@@ -57,25 +56,25 @@ Application::Application(AppSettings settings)
     {
         const auto entity = m_registry.create();
         auto &camera = m_registry.emplace<CameraComponent>(entity);
-        auto &mesh = m_registry.emplace<MeshComponent>(entity);
-        mesh.is_configured = true; // Since mesh path is set
+        auto &model = m_registry.emplace<ModelComponent>(entity);
+        model.is_configured = true; // Since model path is set
 
         if (i % 2 == 0)
         {
             camera.ROTATION_SPEED = 5.0f;
-            mesh.m_filename = get_assets_dir() + "models/Starship.stl";
+            model.m_filename = get_assets_dir() + "models/Starship.stl";
         } else
         {
             camera.ROTATION_SPEED = 10.0f;
-            mesh.m_filename = get_assets_dir() + "models/SuperHeavy_Booster.stl";
+            model.m_filename = get_assets_dir() + "models/SuperHeavy_Booster.stl";
         }
     }
 
 
     // Init Systems
-    auto mesh_system = MeshSystem(&m_registry);
-    mesh_system.process();
-    mesh_system.process();
+    auto model_system = ModelSystem(&m_registry);
+    model_system.process();
+    model_system.process();
 
     // Init UI
     this->m_settings = settings;

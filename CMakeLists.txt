@@ -50,8 +50,6 @@ file(GLOB_RECURSE APP_HEADERS "include/*.h")
 imgui_bundle_add_app(${PROJECT_NAME} ${APP_SOURCES})
 
 include_directories(include/)
-include_directories(include/components)
-include_directories(include/systems)
 
 include_directories(lib/assimp/include)
 
