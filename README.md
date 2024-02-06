@@ -14,17 +14,14 @@ make -j 4
 
 ## Build for Windows
 
-### 1. Optional: clone imgui_bundle
-Follow step 1 from the Linux/macOS section above.
-
-### 2. Create the build directory, run cmake
+### 1. Create the build directory, run cmake
 
 ```bash
 mkdir build && cd build
 cmake ..
 ```
 
-### 3. Open the Visual Studio solution
+### 2. Open the Visual Studio solution
 It should be located in `build/imgui_bundle_example_integration.sln`
 
 ## Build for emscripten
