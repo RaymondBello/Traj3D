@@ -42,10 +42,8 @@ source ~/emsdk/emsdk_env.sh
 # cmake and build
 mkdir build_em
 cd build_em
+
 emcmake cmake ..
-emcmake cmake -D CMAKE_PREFIX_PATH=/opt/homebrew/opt/zlib/include:/opt/homebrew/opt/zlib/lib ..
-
-
 make -j 4
 
 # launch a webserver
