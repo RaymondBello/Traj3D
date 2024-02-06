@@ -1,6 +1,6 @@
 
 #include <stdio.h>
-#include "Application.h"
+#include <Application.h>
 
 #ifdef __EMSCRIPTEN__
 #include "imgui/examples/libs/emscripten/emscripten_mainloop_stub.h"

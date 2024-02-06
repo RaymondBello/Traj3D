@@ -22,15 +22,23 @@ if (NOT TARGET imgui_bundle)
 endif()
 
 
+# Set the default value to ON (or OFF if you prefer)
+option(ASSIMP_BUILD_ZLIB "Build ZLIB support in Assimp" ON)
+
+# Use the option value in your configuration
+if(ASSIMP_BUILD_ZLIB)
+    add_definitions(-DASSIMP_BUILD_ZLIB=ON)
+else()
+    add_definitions(-DASSIMP_BUILD_ZLIB=OFF)
+endif()
+
+
 # ==============
 # Add Math & Utility Libraries
 # ==============
 add_subdirectory(lib/glm)
 add_subdirectory(lib/entt)
-# add_subdirectory(lib/stb)
-# add_subdirectory(lib/assimp)
-
-
+add_subdirectory(lib/assimp)
 
 
 # ==============
@@ -39,17 +47,22 @@ add_subdirectory(lib/entt)
 file(GLOB_RECURSE APP_SOURCES "src/*.cpp")
 file(GLOB_RECURSE APP_HEADERS "include/*.h")
 
-
 imgui_bundle_add_app(${PROJECT_NAME} ${APP_SOURCES})
 
 include_directories(include/)
 include_directories(include/components)
+include_directories(include/systems)
+
+include_directories(lib/assimp/include)
 
 # Link 3d Math library
 target_link_libraries(${PROJECT_NAME} PRIVATE glm)
 
 # Link entt
 target_link_libraries(${PROJECT_NAME} PRIVATE EnTT::EnTT)
+
+# Link assimp
+target_link_libraries(${PROJECT_NAME} PRIVATE assimp)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_compile_definitions(${PROJECT_NAME} PRIVATE GL_SILENCE_DEPRECATION)
@@ -71,4 +84,5 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 #     emcmake cmake ..
 #     make -j4
 #     emrun --browser chrome TrajectorySim.html
+
 

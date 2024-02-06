@@ -16,7 +16,7 @@
 #include <unordered_map> // for UniformsList
 // #include <OpenGL/gltypes.h>
 
-
+#include "ApplicationSettings.h"
 
 struct _Vec2
 {

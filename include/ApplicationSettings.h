@@ -14,3 +14,4 @@ struct AppSettings
     std::string asset_path;
     float font_size;
 };
+
