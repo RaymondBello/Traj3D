@@ -1,3 +1,11 @@
 [submodule "external/imgui_bundle"]
 	path = external/imgui_bundle
 	url = https://github.com/pthom/imgui_bundle.git
+
+[submodule "lib/assimp"]
+	path = lib/assimp
+	url = https://github.com/assimp/assimp.git
+	
+[submodule "lib/entt"]
+	path = lib/entt
+	url = https://github.com/skypjack/entt.git

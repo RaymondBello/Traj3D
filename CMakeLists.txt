@@ -26,6 +26,7 @@ endif()
 # Add Math & Utility Libraries
 # ==============
 add_subdirectory(lib/glm)
+add_subdirectory(lib/entt)
 # add_subdirectory(lib/stb)
 # add_subdirectory(lib/assimp)
 
@@ -42,10 +43,13 @@ file(GLOB_RECURSE APP_HEADERS "include/*.h")
 imgui_bundle_add_app(${PROJECT_NAME} ${APP_SOURCES})
 
 include_directories(include/)
+include_directories(include/components)
 
-# Include Math & utility libraries
+# Link 3d Math library
 target_link_libraries(${PROJECT_NAME} PRIVATE glm)
 
+# Link entt
+target_link_libraries(${PROJECT_NAME} PRIVATE EnTT::EnTT)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_compile_definitions(${PROJECT_NAME} PRIVATE GL_SILENCE_DEPRECATION)
