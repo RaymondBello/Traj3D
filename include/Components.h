@@ -1,5 +1,10 @@
 #pragma once
 
+// #include <stdio.h>
+// #include <sstream>
+// #include <iostream>
+// #include <fstream>
+// #include <string>
 
 //===================================================
 // Define Helper structs
@@ -92,8 +97,8 @@ struct ShaderComponent
 {
     unsigned int m_shader_id;
 
-    std:string m_vert_shader;
-    std:string m_frag_shader;
+    std::string m_vert_shader;
+    std::string m_frag_shader;
 
     const char *m_shader_source;
 

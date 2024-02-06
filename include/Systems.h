@@ -14,7 +14,7 @@ public:
     // Public methods
     ModelSystem(entt::registry *reg)
     {
-        HelloImGui::Log(HelloImGui::LogLevel::Info, "Init ModelSystem");
+        HelloImGui::Log(HelloImGui::LogLevel::Info, "Created ModelSystem");
         m_registry = reg;
     }
 
