@@ -22,8 +22,9 @@ if (NOT TARGET imgui_bundle)
 endif()
 
 
-# Set the default value to ON (or OFF if you prefer)
-option(ASSIMP_BUILD_ZLIB "Build ZLIB support in Assimp" ON)
+# Set Assimp build flags
+option(ASSIMP_BUILD_ZLIB  "Build ZLIB support in Assimp" ON)
+option(ASSIMP_BUILD_TESTS "Build test suite for Assimp"  OFF)
 
 # Use the option value in your configuration
 if(ASSIMP_BUILD_ZLIB)
@@ -32,6 +33,11 @@ else()
     add_definitions(-DASSIMP_BUILD_ZLIB=OFF)
 endif()
 
+if(ASSIMP_BUILD_TESTS)
+    add_definitions(-DASSIMP_BUILD_TESTS=ON)
+else()
+    add_definitions(-DASSIMP_BUILD_TESTS=OFF)
+endif()
 
 # ==============
 # Add Math & Utility Libraries
