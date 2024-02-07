@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(TrajectorySim)
+project(Traj3D)
 set(CMAKE_CXX_STANDARD 17)
 
 
@@ -87,6 +87,6 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 # Build with emscripten
 #     emcmake cmake ..
 #     make -j4
-#     emrun --browser chrome TrajectorySim.html
+#     emrun --browser chrome Traj3D.html
 
 

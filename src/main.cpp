@@ -9,7 +9,7 @@
 int main(int, char **)
 {
     AppSettings settings;
-    settings.title = "TrajectorySim";
+    settings.title = "Traj3D";
     settings.v_width = 1400;
     settings.v_height = 900;
     settings.log_file = "config.ini";

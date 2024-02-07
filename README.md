@@ -1,5 +1,5 @@
 
-# TrajectorySim
+# Traj3D
 
 
 ## Build for Linux and macOS
