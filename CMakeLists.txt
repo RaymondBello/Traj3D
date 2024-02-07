@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.12)
 project(Traj3D)
 set(CMAKE_CXX_STANDARD 17)
 
+if (UNIX)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+endif()
+
+
+# Set Assimp build flags
+option(ASSIMP_BUILD_ZLIB  "Build ZLIB support in Assimp" ON)
+option(ASSIMP_BUILD_TESTS "Build test suite for Assimp"  OFF)
 
 # ==============
 # Add ImGui
@@ -22,10 +30,6 @@ if (NOT TARGET imgui_bundle)
 endif()
 
 
-# Set Assimp build flags
-option(ASSIMP_BUILD_ZLIB  "Build ZLIB support in Assimp" ON)
-option(ASSIMP_BUILD_TESTS "Build test suite for Assimp"  OFF)
-
 # Use the option value in your configuration
 if(ASSIMP_BUILD_ZLIB)
     add_definitions(-DASSIMP_BUILD_ZLIB=ON)
@@ -38,6 +42,8 @@ if(ASSIMP_BUILD_TESTS)
 else()
     add_definitions(-DASSIMP_BUILD_TESTS=OFF)
 endif()
+
+
 
 # ==============
 # Add Math & Utility Libraries

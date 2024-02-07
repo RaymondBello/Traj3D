@@ -76,8 +76,8 @@ Application::Application(AppSettings settings)
     model_system.process();
 
     // Init UI
+    printf("created app: %s with settings\n", settings.title.c_str());
     this->m_settings = settings;
-    printf("created app: %s with settings\n", (char *)&this->m_settings.title);
     this->m_ui = ParameterUI(settings);
 }
 

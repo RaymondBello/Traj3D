@@ -1,0 +1,21 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "cmake_config_unix",
+            "displayName": "cmake_config_unix",
+            "description": "Using compilers: C = /usr/bin/gcc, CXX = /usr/bin/g++",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "/usr/bin/gcc",
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "HELLOIMGUI_DOWNLOAD_FREETYPE_IF_NEEDED": "ON",
+                "HELLOIMGUI_WITH_TEST_ENGINE": "OFF",
+                "IMGUI_BUNDLE_WITH_TEST_ENGINE": "OFF"
+            }
+        }
+    ]
+}
