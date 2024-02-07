@@ -2,8 +2,8 @@
     "version": 2,
     "configurePresets": [
         {
-            "name": "cmake_config_unix",
-            "displayName": "cmake_config_unix",
+            "name": "cmake_config_linux",
+            "displayName": "cmake_config_linux",
             "description": "Using compilers: C = /usr/bin/gcc, CXX = /usr/bin/g++",
             "generator": "Unix Makefiles",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
