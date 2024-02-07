@@ -55,5 +55,5 @@ jobs:
       run: |
         mkdir build_em 
         cd build_em
-        emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
+        emcmake cmake -DCMAKE_BUILD_TYPE=Release .. 
         make -j 4

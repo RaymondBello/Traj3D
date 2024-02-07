@@ -2,10 +2,14 @@ cmake_minimum_required(VERSION 3.12)
 project(Traj3D)
 set(CMAKE_CXX_STANDARD 17)
 
-if (UNIX)
+
+
+# Pthread flasg
+option(COMPILE_WITH_PTHREAD " Compiles with PTHEAD" OFF)
+
+if (COMPILE_WITH_PTHREAD)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif()
-
 
 # Set Assimp build flags
 option(ASSIMP_BUILD_ZLIB  "Build ZLIB support in Assimp" ON)
