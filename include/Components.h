@@ -7,33 +7,6 @@
 // #include <string>
 
 //===================================================
-// Define Helper structs
-//===================================================
-struct Vertex
-{
-    glm::vec3 m_pos;
-    glm::vec2 m_tex;
-    glm::vec3 m_normal;
-
-    Vertex() : m_pos(glm::vec3(0.0f)), m_tex(glm::vec2(0.0f)), m_normal(glm::vec3(0.0f)) {}
-
-    Vertex(glm::vec3 pos, glm::vec2 tex, glm::vec3 normal)
-    {
-        m_pos = pos;
-        m_tex = tex;
-        m_normal = normal;
-    }
-
-    Vertex(glm::vec3 pos, glm::vec2 tex)
-    {
-        m_pos = pos;
-        m_tex = tex;
-        m_normal = glm::vec3(0.0f, 0.0f, 0.0f);
-    }
-};
-
-
-//===================================================
 // Define Components
 //===================================================
 struct TransformComponent
@@ -50,47 +23,75 @@ struct CameraComponent
     const glm::vec3 FORWARD     = {0.0f, 0.0f, -1.0f};
 
     // Camera Attributes
-    float m_aspect;
-    float m_fov;
-    float m_near;
-    float m_far;
-    float m_distance = 5.0f;
+    float aspect;
+    float fov;
+    float near;
+    float far;
+    float distance = 5.0f;
     glm::vec3 mFocus = {0.0f, 0.0f, 0.0f};
 
     // Orientation
-    float m_pitch = 0.0f;
-    float m_yaw = 0.0f;
+    float pitch = 0.0f;
+    float yaw = 0.0f;
 
     // World position and mouse screen coords
-    glm::mat4 m_view_mat;
-    glm::mat4 m_proj_mat = glm::mat4{1.0f};
-    glm::vec3 m_position = {0.0f, 0.0f, 0.0f};
+    glm::mat4 view_mat;
+    glm::mat4 proj_mat = glm::mat4{1.0f};
+    glm::vec3 position = {0.0f, 0.0f, 0.0f};
 
     // Mouse 2d screen coords
-    glm::vec2 m_curr_mouse;
+    glm::vec2 curr_mouse;
 
 };
+
+
 
 struct ModelComponent
 {
     // Path to mesh
-    std::string m_filename;
+    std::string filename;
 
-    // Vertex buffer array and index array
-    GLuint m_vbo;
-    GLuint m_ebo;
+    // Utilities to load meshes
+    Assimp::Importer importer; // https://assimp-docs.readthedocs.io/en/v5.1.0/ ... (An older Assimp website: http://assimp.sourceforge.net/lib_html/index.html)
+    const aiScene *scene = nullptr;
+    aiNode *root_node = nullptr; // Only being used in the: load_model_cout_console() function.
 
-    std::vector<Vertex> m_vertices;
-    std::vector<unsigned int> m_indices;
+    // Mesh Struct
+    struct Mesh
+    {
+        unsigned int vao  = 0;
+        unsigned int vbo1 = 0;
+        unsigned int vbo2 = 0;
+        unsigned int vbo3 = 0;
+        unsigned int ebo  = 0;
+        unsigned int tex_handle;
 
+        std::vector<glm::vec3> vert_positions;
+        std::vector<glm::vec3> vert_normals;
+        std::vector<glm::vec2> tex_coords;
+        std::vector<unsigned int> vert_indices;
+    };
+
+    struct Texture
+    {
+        unsigned int textureID;
+        std::string image_name;
+    };
+    
     // Bool to manage state
     bool is_configured = false;
     bool is_loaded = false;
 
-    // Size of arrays
-    unsigned int m_num_indices;
-    unsigned int m_num_materials;
+    // Lists
+    unsigned int num_meshes;
+    std::vector<Mesh> mesh_list;
+    std::vector<Texture> texture_list;
 
+    // Constructor with no arguments
+    ModelComponent() : is_configured(false) {}
+
+    // Constructor with path argument
+    ModelComponent(const std::string& path) : filename(path), is_configured(true) {}
 };
 
 struct ShaderComponent

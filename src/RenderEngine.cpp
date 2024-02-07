@@ -158,7 +158,7 @@ void RenderEngine::render()
                     io.DisplaySize.y * io.DisplayFramebufferScale.y);
 
     ImVec2 displaySize = r;
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.30f, 0.55f, 0.65f, 1.0f);
     glViewport(0, 0, (GLsizei)displaySize.x, (GLsizei)displaySize.y);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

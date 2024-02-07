@@ -8,10 +8,13 @@
 #include "immapp/immapp.h"
 #include "implot/implot.h"
 
+#include "stb_hello_imgui/stb_image.h"
+
 #include "ApplicationSettings.h"
 #include "ParameterUIState.h"
 
 #include "RenderEngine.h"
+
 
 class ParameterUI
 {

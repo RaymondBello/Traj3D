@@ -56,23 +56,22 @@ Application::Application(AppSettings settings)
     {
         const auto entity = m_registry.create();
         auto &camera = m_registry.emplace<CameraComponent>(entity);
-        auto &model = m_registry.emplace<ModelComponent>(entity);
-        model.is_configured = true; // Since model path is set
 
         if (i % 2 == 0)
         {
             camera.ROTATION_SPEED = 5.0f;
-            model.m_filename = get_assets_dir() + "models/Starship.stl";
+            m_registry.emplace<ModelComponent>(entity, get_assets_dir() + "models/Starship.stl");
         } else
         {
             camera.ROTATION_SPEED = 10.0f;
-            model.m_filename = get_assets_dir() + "models/SuperHeavy_Booster.stl";
+            m_registry.emplace<ModelComponent>(entity, get_assets_dir() + "models/SuperHeavy_Booster.stl");
         }
     }
 
 
     // Init Systems
     auto model_system = ModelSystem(&m_registry);
+    model_system.process();
     model_system.process();
     model_system.process();
 
