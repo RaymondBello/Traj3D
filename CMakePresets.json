@@ -33,6 +33,19 @@
             "IMGUI_BUNDLE_WITH_TEST_ENGINE": "OFF",
             "CMAKE_MAKE_PROGRAM": "C:/msys64/usr/bin/make.exe"
           }
+        },
+        {
+          "name": "cmake_config_macos",
+          "displayName": "cmake_config_macos: Clang 15.0.0 arm64-apple-darwin22.6.0",
+          "description": "Using compilers: C = /usr/bin/clang, CXX = /usr/bin/clang++",
+          "generator": "Unix Makefiles",
+          "binaryDir": "${sourceDir}/out/build/${presetName}",
+          "cacheVariables": {
+            "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+            "CMAKE_C_COMPILER": "/usr/bin/clang",
+            "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+            "CMAKE_BUILD_TYPE": "Debug"
+          }
         }
     ]
 }
