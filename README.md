@@ -7,6 +7,7 @@
 ### 1. Create the build directory, run cmake and make
 
 ```bash
+git submodule update --init --recursive
 mkdir -p build && cd build
 cmake ..
 make -j 4
@@ -17,6 +18,7 @@ make -j 4
 ### 1. Create the build directory, run cmake
 
 ```bash
+git submodule update --init --recursive
 mkdir build && cd build
 cmake ..
 ```
