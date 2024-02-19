@@ -4,5 +4,6 @@
 build/
 build_em/
 build_emscripten/
+out/
 __pycache__/
 xcode/
