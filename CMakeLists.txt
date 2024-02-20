@@ -28,7 +28,7 @@ if (NOT TARGET imgui_bundle)
     message(STATUS "Fetching imgui_bundle...")
     include(FetchContent)
     Set(FETCHCONTENT_QUIET FALSE)
-    FetchContent_Declare(imgui_bundle GIT_REPOSITORY https://github.com/pthom/imgui_bundle.git GIT_TAG main)
+    FetchContent_Declare(imgui_bundle GIT_REPOSITORY https://github.com/RaymondBello/imgui_bundle.git GIT_TAG main)
     FetchContent_MakeAvailable(imgui_bundle)
 
 endif()
