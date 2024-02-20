@@ -9,6 +9,7 @@ struct AppSettings
     bool show_demo;
     bool no_title_bar;
     bool menubar;
+    bool restore_previous_dimensions;
     std::string log_file;
     std::string font_path;
     std::string asset_path;

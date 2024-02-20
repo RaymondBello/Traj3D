@@ -117,7 +117,7 @@ void RenderEngine::initialize()
             0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f // Upper corner
         };
 
-    // Create reference containers for the Vartex Array Object and the Vertex Buffer Object
+    // Create reference containers for the Vertex Array Object and the Vertex Buffer Object
     GLuint VAO, VBO;
 
     // Generate the VAO and VBO with only 1 object each
@@ -144,7 +144,6 @@ void RenderEngine::initialize()
     this->m_vao = VAO;
     this->m_vbo = VBO;
 }
-
 
 void RenderEngine::render()
 {

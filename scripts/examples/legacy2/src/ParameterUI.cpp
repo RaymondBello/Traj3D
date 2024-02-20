@@ -123,20 +123,20 @@ std::vector<HelloImGui::DockingSplit> ParameterUI::create_docking_splits()
     HelloImGui::DockingSplit inspector_split;
     inspector_split.initialDock = "MainDockSpace";
     inspector_split.newDock = "Inspector";
-    inspector_split.direction = ImGuiDir_Left;
+    inspector_split.direction = ImGuiDir_Right;
     inspector_split.ratio = 0.2f;
 
     HelloImGui::DockingSplit logs_split;
-    logs_split.initialDock = "Inspector";
+    logs_split.initialDock = "MainDockSpace";
     logs_split.newDock = "Logs";
     logs_split.direction = ImGuiDir_Down;
-    logs_split.ratio = 0.35f;
+    logs_split.ratio = 0.2f;
 
     HelloImGui::DockingSplit scene_split;
-    scene_split.initialDock = "MainDockSpace";
+    scene_split.initialDock = "Inspector";
     scene_split.newDock = "Scene";
-    scene_split.direction = ImGuiDir_Right;
-    scene_split.ratio = 0.25f;
+    scene_split.direction = ImGuiDir_Up;
+    scene_split.ratio = 0.35f;
 
     std::vector<HelloImGui::DockingSplit> splits{
         inspector_split,
@@ -173,7 +173,7 @@ std::vector<HelloImGui::DockableWindow> ParameterUI::create_docking_windows(AppS
     // Plots
     HelloImGui::DockableWindow w_plots;
     w_plots.label = ICON_FA_CHART_AREA " Plots";
-    w_plots.dockSpaceName = "Scene";
+    w_plots.dockSpaceName = "Inspector";
     w_plots.GuiFunction = [&]
     { create_plots(); };
 

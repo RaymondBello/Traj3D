@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ApplicationSettings.h"
-#include "ParameterUI.h"
+#include "UILayer/UILayer.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -10,10 +10,10 @@
 #include <entt/entt.hpp>
 
 // Components
-#include <Components.h>
+// #include <Components.h>
 
 // Systems
-#include <Systems.h>
+// #include <Systems.h>
 
 std::string get_assets_dir()
 {
@@ -27,10 +27,8 @@ std::string get_assets_dir()
 class Application
 {
 private:
-    /* data */
     AppSettings m_settings;
-    ParameterUI m_ui;
-    entt::registry m_registry;
+    UILayer m_ui;
 
 public:
     Application();
@@ -49,36 +47,33 @@ Application::Application()
 Application::Application(AppSettings settings)
 {
 
-    // Create entities and registry
-    m_registry = entt::registry();
+    // // Create entities and registry
+    // m_registry = entt::registry();
 
-    for (auto i = 0u; i < 4u; ++i)
-    {
-        const auto entity = m_registry.create();
-        auto &camera = m_registry.emplace<CameraComponent>(entity);
+    // for (auto i = 0u; i < 4u; ++i)
+    // {
+    //     const auto entity = m_registry.create();
+    //     auto &camera = m_registry.emplace<CameraComponent>(entity);
 
-        if (i % 2 == 0)
-        {
-            camera.ROTATION_SPEED = 5.0f;
-            m_registry.emplace<ModelComponent>(entity, get_assets_dir() + "models/Starship.stl");
-        } else
-        {
-            camera.ROTATION_SPEED = 10.0f;
-            m_registry.emplace<ModelComponent>(entity, get_assets_dir() + "models/SuperHeavy_Booster.stl");
-        }
-    }
+    //     if (i % 2 == 0)
+    //     {
+    //         camera.ROTATION_SPEED = 5.0f;
+    //         m_registry.emplace<ModelComponent>(entity, get_assets_dir() + "models/StarShip.stl");
+    //     } else
+    //     {
+    //         camera.ROTATION_SPEED = 10.0f;
+    //         m_registry.emplace<ModelComponent>(entity, get_assets_dir() + "models/SuperHeavy_Booster.stl");
+    //     }
+    // }
 
-
-    // Init Systems
-    auto model_system = ModelSystem(&m_registry);
-    model_system.process();
-    model_system.process();
-    model_system.process();
+    // // Init Systems
+    // auto model_system = ModelSystem(&m_registry);
+    // model_system.process();
 
     // Init UI
     printf("created app: %s with settings\n", settings.title.c_str());
     this->m_settings = settings;
-    this->m_ui = ParameterUI(settings);
+    this->m_ui = UILayer(settings);
 }
 
 Application::~Application()

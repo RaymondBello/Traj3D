@@ -6,7 +6,7 @@
 #include "imgui/examples/libs/emscripten/emscripten_mainloop_stub.h"
 #endif
 
-int main(int, char **)
+int main()
 {
     AppSettings settings;
     settings.title = "Traj3D";
@@ -17,6 +17,7 @@ int main(int, char **)
     settings.font_size = 17.0;
     settings.asset_path = "assets/";
     settings.show_demo = false;
+    settings.restore_previous_dimensions = false;
 
     Application app = Application(settings);
     app.run();
