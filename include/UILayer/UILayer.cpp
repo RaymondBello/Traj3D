@@ -109,15 +109,15 @@ void UILayer::on_renderer_update()
             glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
             glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
 
-            auto flatColorShader = ((OpenGLShader *)m_FlatColorShader);
-            auto squareVA = ((VertexArray *)m_SquareVA);
+            // auto flatColorShader = ((OpenGLShader *)m_FlatColorShader);
+            // auto squareVA = ((VertexArray *)m_SquareVA);
 
             // auto flatShader = std::make_shared<OpenGLShader>(flatColorShader);
-            // Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
+            Renderer::Submit(*m_FlatColorShader, *m_SquareVA, transform);
         }
     }
 
-    // Renderer::Submit(m_Shader, m_VertexArray);
+    Renderer::Submit(*m_Shader, *m_VertexArray);
 
     Renderer::EndScene();
 }
