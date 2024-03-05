@@ -10,7 +10,7 @@
 #include <entt/entt.hpp>
 
 // Components
-// #include <Components.h>
+#include <Components.h>
 
 // Systems
 // #include <Systems.h>
@@ -100,7 +100,7 @@ void Application::run()
 
     // Status bar
     runner_params.imGuiWindowParams.showStatusBar = true;
-    runner_params.fpsIdling.enableIdling = false;
+    runner_params.fpsIdling.enableIdling = m_settings.fps_idling;
     runner_params.callbacks.ShowStatus = [&]()
     { m_ui.status_bar(); };
 

@@ -1,30 +1,64 @@
 #pragma once
 
-// #include <stdio.h>
-// #include <sstream>
-// #include <iostream>
-// #include <fstream>
-// #include <string>
 
-//===================================================
-// Define Components
-//===================================================
+/**
+ * @brief Represents a 3D transform (position, rotation, scale).
+ * This struct is used to store the position, rotation, and scale of an entity in 3D space.
+ */
 struct TransformComponent
 {
-    /* data */
+    // Default constructor which initializes all members to zero.
+    TransformComponent() : position{0.0f, 0.0f, 0.0f}, // initial position
+                           rotation{0.0f, 0.0f, 0.0f}, // initial rotation in degrees
+                           scale{1.0f, 1.0f, 1.0f}     // initial scale
+    {
+    }
+
+    // Constructor that allows to set all members.
+    TransformComponent(const glm::vec3 &position,
+                       const glm::vec3 &rotation,
+                       const glm::vec3 &scale) : position{position}, // entity's position
+                                                 rotation{rotation}, // entity's rotation in degrees
+                                                 scale{scale}        // entity's scale
+    {
+    }
+
+    // Get the transformation matrix
+    glm::mat4 getMatrix()
+    {
+        auto transformMatrix = glm::mat4(1.0f);
+        transformMatrix = glm::translate(transformMatrix, position);
+        transformMatrix = glm::rotate(transformMatrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        transformMatrix = glm::rotate(transformMatrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+        transformMatrix = glm::rotate(transformMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+        transformMatrix = glm::scale(transformMatrix, scale);
+
+        return transformMatrix;
+    }
+
+    // Position of the entity in 3D space.
+    glm::vec3 position;
+
+    // Rotation of the entity in 3D space around each axis in degrees.
+    glm::vec3 rotation;
+
+    // Scale of the entity in 3D space.
+    glm::vec3 scale;
 };
+
+
 
 struct CameraComponent
 {
     // Constants (make const?)
-    float ROTATION_SPEED  = 2.0f;
-    const glm::vec3 RIGHT       = {1.0f, 0.0f, 0.0f};
-    const glm::vec3 UP          = {0.0f, 1.0f, 0.0f};
-    const glm::vec3 FORWARD     = {0.0f, 0.0f, -1.0f};
+    float ROTATION_SPEED = 2.0f;
+    const glm::vec3 RIGHT = {1.0f, 0.0f, 0.0f};
+    const glm::vec3 UP = {0.0f, 1.0f, 0.0f};
+    const glm::vec3 FORWARD = {0.0f, 0.0f, -1.0f};
 
     // Camera Attributes
+    float fov = 90.0f;
     float aspect;
-    float fov;
     float near;
     float far;
     float distance = 5.0f;
@@ -41,10 +75,7 @@ struct CameraComponent
 
     // Mouse 2d screen coords
     glm::vec2 curr_mouse;
-
 };
-
-
 
 struct ModelComponent
 {
@@ -59,11 +90,11 @@ struct ModelComponent
     // Mesh Struct
     struct Mesh
     {
-        unsigned int vao  = 0;
+        unsigned int vao = 0;
         unsigned int vbo1 = 0;
         unsigned int vbo2 = 0;
         unsigned int vbo3 = 0;
-        unsigned int ebo  = 0;
+        unsigned int ebo = 0;
         unsigned int tex_handle;
 
         std::vector<glm::vec3> vert_positions;
@@ -77,7 +108,7 @@ struct ModelComponent
         unsigned int textureID;
         std::string image_name;
     };
-    
+
     // Bool to manage state
     bool is_configured = false;
     bool is_loaded = false;
@@ -91,19 +122,6 @@ struct ModelComponent
     ModelComponent() : is_configured(false) {}
 
     // Constructor with path argument
-    ModelComponent(const std::string& path) : filename(path), is_configured(true) {}
-};
-
-struct ShaderComponent
-{
-    unsigned int m_shader_id;
-
-    std::string m_vert_shader;
-    std::string m_frag_shader;
-
-    const char *m_shader_source;
-
-    bool is_active= false;
-    bool is_compiled = false;
+    ModelComponent(const std::string &path) : filename(path), is_configured(true) {}
 };
 

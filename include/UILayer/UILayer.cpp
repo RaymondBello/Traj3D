@@ -27,68 +27,6 @@ void UILayer::destroy_renderer()
 
 void UILayer::setup_renderer()
 {
-    // // Create and initialize a new renderer object
-    // m_Renderer = new Renderer();
-
-    // // Set camera position and initialize the orthographic camera with the specified values
-    // m_CameraPosition = glm::vec3(5.0f, 5.0f, 1.0f);
-    // m_Camera = OrthographicCamera(-1.6f, 1.6f, -0.9f, 0.9f);
-    // m_Camera.SetPosition(m_CameraPosition);
-
-    // // Create a vertex array for a triangle
-    // m_VertexArray = VertexArray::Create();
-
-    // // Define the vertices of the triangle and set up the vertex buffer with the corresponding layout
-    // float vertices[3 * 7] = {
-    //     -0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
-    //     0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
-    //     0.0f, 0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f};
-    // std::shared_ptr<VertexBuffer> vertexBuffer;
-    // vertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
-    // BufferLayout layout = {
-    //     {ShaderDataType::Float3, "a_Position"},
-    //     {ShaderDataType::Float4, "a_Color"}
-    // };
-    // vertexBuffer->SetLayout(layout);
-    // m_VertexArray->AddVertexBuffer(vertexBuffer);
-
-    // // Define the indices of the triangle and set up the index buffer
-    // uint32_t indices[3] = {0, 1, 2};
-    // std::shared_ptr<IndexBuffer> indexBuffer;
-    // indexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
-    // m_VertexArray->SetIndexBuffer(indexBuffer);
-
-    // // Create a vertex array for a square
-    // m_SquareVA = VertexArray::Create();
-
-    // // Define the vertices of the square and set up the vertex buffer with the corresponding layout
-    // float squareVertices[3 * 4] = {
-    //     -0.5f, -0.5f, 0.0f,
-    //     0.5f, -0.5f, 0.0f,
-    //     0.5f, 0.5f, 0.0f,
-    //     -0.5f, 0.5f, 0.0f};
-    // std::shared_ptr<VertexBuffer> squareVB;
-    // squareVB.reset(VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
-    // squareVB->SetLayout({{ShaderDataType::Float3, "a_Position"}});
-    // m_SquareVA->AddVertexBuffer(squareVB);
-
-    // // Define the indices of the square and set up the index buffer
-    // uint32_t squareIndices[6] = {0, 1, 2, 2, 3, 0};
-    // std::shared_ptr<IndexBuffer> squareIB;
-    // squareIB.reset(IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
-    // m_SquareVA->SetIndexBuffer(squareIB);
-
-    // // Compile shader programs from files and create shaders
-    // std::string vertSrc, fragSrc;
-    // vertSrc = load_shader(get_assets_folder() + "shaders/shader.vert");
-    // fragSrc = load_shader(get_assets_folder() + "shaders/shader.frag");
-    // m_Shader = Shader::Create(vertSrc, fragSrc);
-
-    // std::string flatVertSrc, flatFragSrc;
-    // flatVertSrc = load_shader(get_assets_folder() + "shaders/flat_shader.vert");
-    // flatFragSrc = load_shader(get_assets_folder() + "shaders/flat_shader.frag");
-    // m_FlatColorShader = Shader::Create(flatVertSrc, flatFragSrc);
-
     // Print OpenGL version
     HelloImGui::Log(HelloImGui::LogLevel::Info, "Initializing OpenGL version: %s\n", glGetString(GL_VERSION));
 
@@ -259,75 +197,46 @@ void UILayer::on_renderer_update()
     // Add scale to the model matrix
     modelMatrix = glm::scale(modelMatrix, m_scale);
 
+    // Set the model matrix in the shader
     auto shaderId = m_Shader->m_RendererID;
     auto modelMatrixLocation = glGetUniformLocation(shaderId, "u_ModelMatrix");
     glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
+    // Set the view matrix in the shader
     auto viewMatrix = glm::mat4(1.0f);
     auto viewMatrixLocation = glGetUniformLocation(shaderId, "u_ViewMatrix");
     glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
+    // Create a projection matrix either orthographic or perspective
     auto projectionMatrix = glm::perspective(glm::radians(60.0f), displaySize.x / displaySize.y, 0.1f, 100.0f);
     // auto projectionMatrix = glm::ortho(-3.0f, 3.0f, -2.0f, 2.0f, -1.0f, 1.0f);
-    // Create a projection matrix with the ratio of 16:9 but 3.
 
     auto projectionMatrixLocation = glGetUniformLocation(shaderId, "u_ProjectionMatrix");
     glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
-    // HelloImGui::Log(HelloImGui::LogLevel::Info, "DeltaTime: %0f\n", io.DeltaTime);
-
+    // Bind the VAO
     glBindVertexArray(m_vao);
 
     // glDrawArrays(GL_TRIANGLES, 0, 3);
     glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, 0);
 
+    // Unbind the VAO and shader
     glBindVertexArray(0);
     glUseProgram(0);
 
-
+    // Setup Depth Testing
     glEnable(GL_DEPTH_TEST);
     // glDepthFunc(GL_LESS);
     // glDepthFunc(GL_GREATER);
     // glDisable(GL_DEPTH_TEST);
 
+    // Setup Face Culling
     glEnable(GL_CULL_FACE);
     // glFrontFace(GL_CCW);
     // glCullFace(GL_FRONT);
     glCullFace(GL_BACK);
     // glDisable(GL_CULL_FACE);
 
-
-    // m_Camera.SetPosition(m_CameraPosition);
-    // m_Camera.SetRotation(m_CameraRotation);
-
-    // m_Renderer->BeginScene(m_Camera);
-
-    // glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-
-    // // std::dynamic_pointer_cast<OpenGLShader>(m_FlatColorShader)->Bind();
-    // ((OpenGLShader *)m_FlatColorShader)->Bind();
-
-    // // std::dynamic_pointer_cast<OpenGLShader>(m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
-    // ((OpenGLShader *)m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
-
-    // for (int y = 0; y < 20; y++)
-    // {
-    //     for (int x = 0; x < 20; x++)
-    //     {
-    //         glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
-    //         glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-
-    //         // auto flatColorShader = ((OpenGLShader *)m_FlatColorShader);
-    //         // auto squareVA = ((VertexArray *)m_SquareVA);
-
-    //         // auto flatShader = std::make_shared<OpenGLShader>(flatColorShader);
-    //         m_Renderer->Submit(*m_FlatColorShader, *m_SquareVA, transform);
-    //     }
-    // }
-
-    // m_Renderer->Submit(*m_Shader, *m_VertexArray);
-
-    // m_Renderer->EndScene();
 }
 
 
@@ -435,7 +344,11 @@ std::vector<HelloImGui::DockableWindow> UILayer::create_docking_windows(AppSetti
 
 void UILayer::create_hierarchy()
 {
-    ImGui::ShowDemoWindow();
+    if (m_settings.show_demo)
+        ImGui::ShowDemoWindow();
+
+    // Display Hierarchy
+
 }
 
 void UILayer::create_plots()
@@ -468,9 +381,6 @@ void UILayer::create_inspector(AppSettings &settings)
         ImGui::DragFloat3("Position", glm::value_ptr(m_position), 0.1f);
         ImGui::DragFloat3("Rotation", glm::value_ptr(m_rotation), 1.0f, -180.0f, 180.0f);
         ImGui::DragFloat3("Scale", glm::value_ptr(m_scale), 0.1f);
-
-
-
 
     }
 
@@ -510,6 +420,16 @@ std::string UILayer::load_shader(std::string file)
 
 void UILayer::show_menu()
 {
+    if (ImGui::BeginMenu("Settings"))
+    {
+        if (ImGui::BeginMenu("Demo Window"))
+        {
+            ImGui::Checkbox("Show", &m_settings.show_demo);
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenu();
+    }
 }
 
 void UILayer::status_bar()

@@ -106,10 +106,10 @@ private:
 
 public:
     // Entity Component Registry
-    std::shared_ptr<entt::registry> m_registry;
+    std::shared_ptr<entt::registry> m_Registry;
 
     // UI Entity Inspector
-    std::shared_ptr<uint32_t> m_selected_entity;
+    std::shared_ptr<uint32_t> m_Selected_entity;
 
     UILayer(/* args */);
     UILayer(AppSettings& settings);

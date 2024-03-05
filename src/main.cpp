@@ -17,6 +17,7 @@ int main()
     settings.font_size = 17.0;
     settings.asset_path = "assets/";
     settings.show_demo = false;
+    settings.fps_idling = true;
     settings.restore_previous_dimensions = false;
 
     Application app = Application(settings);
