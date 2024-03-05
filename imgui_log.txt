@@ -1,0 +1,21 @@
+(?)
+[ Copy "Hello, world!" to clipboard ]
+### Window options ###
+### Widgets ###
+### Layout & Scrolling ###
+### Popups & Modal windows ###
+### Tables & Columns ###
+### Inputs & Focus ###
+[ Debug ] [  Info ] [  Warning ] [  Error ] [x] Cumulative [ Clear ]
+{ }  Filter (inc,-exc)
+Initializing UI Layer
+
+Initializing OpenGL version: 4.1 Metal - 83.1
+
+Loaded shader: default.vert
+
+Loaded shader: default.frag
+
+Adding font: fonts/SF-Pro.ttf, 17.000000
+
+[ ] Enable idling FPS: 60.1

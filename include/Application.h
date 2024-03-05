@@ -72,8 +72,7 @@ Application::Application(AppSettings settings)
 
     // Init UI
     printf("created app: %s with settings\n", settings.title.c_str());
-    this->m_settings = settings;
-    this->m_ui = UILayer(settings);
+    m_settings = settings;
 }
 
 Application::~Application()
@@ -83,5 +82,68 @@ Application::~Application()
 void Application::run()
 {
     printf("Running App\n");
-    this->m_ui.start_event_loop();
+
+    HelloImGui::SetAssetsFolder(m_settings.asset_path);
+    printf("Added asset folder: %s\n", m_settings.asset_path.c_str());
+
+    m_ui = UILayer(m_settings);
+
+    HelloImGui::RunnerParams runner_params;
+
+    runner_params.appWindowParams.windowTitle = m_settings.title;
+    runner_params.imGuiWindowParams.menuAppTitle = "File";
+    runner_params.appWindowParams.windowGeometry.size = {m_settings.v_width, m_settings.v_height};
+    runner_params.appWindowParams.restorePreviousGeometry = m_settings.restore_previous_dimensions;
+
+    runner_params.callbacks.LoadAdditionalFonts = [&]()
+    {m_ui.setup_fonts(m_settings); };
+
+    // Status bar
+    runner_params.imGuiWindowParams.showStatusBar = true;
+    runner_params.fpsIdling.enableIdling = false;
+    runner_params.callbacks.ShowStatus = [&]()
+    { m_ui.status_bar(); };
+
+    // Menu Bar
+    runner_params.imGuiWindowParams.showMenuBar = true;
+    runner_params.imGuiWindowParams.showMenu_App = true;
+    runner_params.imGuiWindowParams.showMenu_View = true;
+    runner_params.callbacks.ShowMenus = [&]()
+    { m_ui.show_menu(); };
+
+    // Theme
+    auto &tweakedTheme = runner_params.imGuiWindowParams.tweakedTheme;
+    tweakedTheme.Theme = ImGuiTheme::ImGuiTheme_SoDark_AccentBlue;
+    tweakedTheme.Tweaks.Rounding = 10.f;
+    runner_params.callbacks.SetupImGuiStyle = []()
+    { ImGui::GetStyle().ItemSpacing = ImVec2(6.f, 4.f); };
+
+    // Create Layout
+    runner_params.imGuiWindowParams.defaultImGuiWindowType = HelloImGui::DefaultImGuiWindowType::ProvideFullScreenDockSpace;
+    runner_params.imGuiWindowParams.enableViewports = true;
+    runner_params.dockingParams = m_ui.create_layout();
+
+    // Add save location
+    runner_params.iniFolderType = HelloImGui::IniFolderType::AppUserConfigFolder;
+    runner_params.iniFilename = m_settings.log_file.c_str();
+
+    // Initialize Plots
+    auto plot_context = ImPlot::CreateContext();
+
+    // ###############################
+    // PostInit & BeforeExit callbacks
+    // #####################################################
+    runner_params.callbacks.PostInit = [&]()
+    { m_ui.setup_renderer(); };
+    runner_params.callbacks.BeforeExit = [&]()
+    { m_ui.destroy_renderer(); };
+
+    // #####################################################
+    // Custom background
+    // #####################################################
+    runner_params.callbacks.CustomBackground = [&]()
+    { m_ui.on_renderer_update(); };
+
+    ImmApp::Run(runner_params);
+
 }

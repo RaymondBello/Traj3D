@@ -21,12 +21,15 @@
 
 #include <lib/glm/glm.hpp>
 #include <lib/glm/gtc/matrix_transform.hpp>
+#include <lib/glm/gtc/type_ptr.hpp>
 
 // ---Renderer------------------------
 #include "Renderer/Renderer.h"
 #include "Renderer/RenderCommand.h"
 
 #include "OpenGL/OpenGLShader.h"
+#include "OpenGL/OpenGLVertexArray.h"
+#include "OpenGL/OpenGLBuffer.h"
 
 #include "Renderer/Buffer.h"
 #include "Renderer/Shader.h"
@@ -34,7 +37,6 @@
 
 #include "Renderer/OrthographicCamera.h"
     // -----------------------------------
-
     inline std::string get_assets_folder()
 {
 #ifndef __EMSCRIPTEN__
@@ -59,8 +61,10 @@ private:
     ImPlotContext *m_plot_context = nullptr;
 
     // Renderer
-    Shader *m_Shader = nullptr;
-    VertexArray *m_VertexArray = nullptr;
+    Renderer *m_Renderer = nullptr;
+
+    OpenGLShader *m_Shader = nullptr;
+    OpenGLVertexArray *m_VertexArray = nullptr;
 
     Shader *m_FlatColorShader = nullptr;
     VertexArray *m_SquareVA = nullptr;
@@ -69,6 +73,22 @@ private:
 
     // std::shared_ptr<Shader> m_Shader;
     // std::shared_ptr<VertexArray> m_VertexArray;
+
+    GLuint m_vao;
+    GLuint m_vbo;
+    GLuint m_ibo;
+    GLuint m_indexCount;
+
+    // UI Variables
+    float m_rotationX = 45.0f;
+    float m_rotationY = 30.0f;
+
+    glm::vec3 m_position = {-0.5f, -0.2f, -2.0f};
+    glm::vec3 m_rotation = {-96.0f, -5.0f, -75.0f};
+    glm::vec3 m_scale    = {1.0f, 1.0f, 1.0f};
+
+    glm::mat4 m_modelMatrix = glm::mat4(1.0f);
+
 
     // Camera
     OrthographicCamera m_Camera;
@@ -111,6 +131,7 @@ public:
 
     // Renderer related
     void setup_renderer();
+    void destroy_renderer();
     void on_renderer_update();
     std::string load_shader(std::string file);
 
