@@ -1,10 +1,22 @@
 #pragma once
 
+#include <lib/glm/glm.hpp>
+#include <lib/glm/gtc/matrix_transform.hpp>
 
-/**
- * @brief Represents a 3D transform (position, rotation, scale).
- * This struct is used to store the position, rotation, and scale of an entity in 3D space.
- */
+struct TagComponent
+{
+    TagComponent() : tag{std::string()} 
+    {
+    };
+    
+    TagComponent(std::string &tag) : tag{tag} 
+    {
+    };
+
+    std::string tag;
+};
+
+
 struct TransformComponent
 {
     // Default constructor which initializes all members to zero.
@@ -75,53 +87,5 @@ struct CameraComponent
 
     // Mouse 2d screen coords
     glm::vec2 curr_mouse;
-};
-
-struct ModelComponent
-{
-    // Path to mesh
-    std::string filename;
-
-    // Utilities to load meshes
-    Assimp::Importer importer; // https://assimp-docs.readthedocs.io/en/v5.1.0/ ... (An older Assimp website: http://assimp.sourceforge.net/lib_html/index.html)
-    const aiScene *scene = nullptr;
-    aiNode *root_node = nullptr; // Only being used in the: load_model_cout_console() function.
-
-    // Mesh Struct
-    struct Mesh
-    {
-        unsigned int vao = 0;
-        unsigned int vbo1 = 0;
-        unsigned int vbo2 = 0;
-        unsigned int vbo3 = 0;
-        unsigned int ebo = 0;
-        unsigned int tex_handle;
-
-        std::vector<glm::vec3> vert_positions;
-        std::vector<glm::vec3> vert_normals;
-        std::vector<glm::vec2> tex_coords;
-        std::vector<unsigned int> vert_indices;
-    };
-
-    struct Texture
-    {
-        unsigned int textureID;
-        std::string image_name;
-    };
-
-    // Bool to manage state
-    bool is_configured = false;
-    bool is_loaded = false;
-
-    // Lists
-    unsigned int num_meshes;
-    std::vector<Mesh> mesh_list;
-    std::vector<Texture> texture_list;
-
-    // Constructor with no arguments
-    ModelComponent() : is_configured(false) {}
-
-    // Constructor with path argument
-    ModelComponent(const std::string &path) : filename(path), is_configured(true) {}
 };
 

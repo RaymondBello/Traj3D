@@ -23,6 +23,11 @@
 #include <lib/glm/gtc/matrix_transform.hpp>
 #include <lib/glm/gtc/type_ptr.hpp>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+
 // ---Renderer------------------------
 #include "Renderer/Renderer.h"
 #include "Renderer/RenderCommand.h"
@@ -36,8 +41,15 @@
 #include "Renderer/VertexArray.h"
 
 #include "Renderer/OrthographicCamera.h"
-    // -----------------------------------
-    inline std::string get_assets_folder()
+
+#include "Components.h"
+
+#include "Scene.h"
+
+
+
+// -----------------------------------
+inline std::string get_assets_folder()
 {
 #ifndef __EMSCRIPTEN__
     return "assets/";
@@ -92,7 +104,7 @@ private:
 
     // Camera
     OrthographicCamera m_Camera;
-    glm::vec3 m_CameraPosition;
+    glm::vec3 m_CameraPosition = {0.0f, 0.0f, 0.0f};
 
     float m_CameraMoveSpeed = 5.0f;
     float m_CameraRotation = 0.0f;
@@ -110,6 +122,9 @@ public:
 
     // UI Entity Inspector
     std::shared_ptr<uint32_t> m_Selected_entity;
+
+    // Scene
+    std::shared_ptr<Scene> m_Scene;
 
     UILayer(/* args */);
     UILayer(AppSettings& settings);

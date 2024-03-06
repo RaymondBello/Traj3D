@@ -3,7 +3,7 @@
 UILayer::UILayer(/* args */)
     : m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 {
-    
+    m_Scene.reset(new Scene());
 }
 
 UILayer::~UILayer()
@@ -347,8 +347,53 @@ void UILayer::create_hierarchy()
     if (m_settings.show_demo)
         ImGui::ShowDemoWindow();
 
-    // Display Hierarchy
+    static int selectionMask = (1 << 0);
+    int node_clicked = -1;
 
+    for (uint8_t i = 0; i < 5; i++)
+    {
+        ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+        const bool is_selected = (selectionMask & (1 << i)) != 0;
+
+        if (is_selected)
+            node_flags |= ImGuiTreeNodeFlags_Selected;
+
+        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, "Entity #%0d", i);
+        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+            node_clicked = i;
+
+        if (node_open)
+        {
+            ImGui::Text("id: %d", i);
+            ImGui::TreePop();
+        }
+    }
+    if (node_clicked != -1)
+    {
+        // Update selection state
+        // (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
+        if (ImGui::GetIO().KeyCtrl)
+            selectionMask ^= (1 << node_clicked); // CTRL+click to toggle
+        else                                       // if (!(selectionMask & (1 << node_clicked))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
+            selectionMask = (1 << node_clicked);  // Click to single-select
+    }
+
+    // Display Hierarchy
+    // if (m_Scene)
+    // {
+    //     for (auto entity : view)
+    //     {
+    //         auto &tag = view.get<TagComponent>(entity);
+    //         ImGui::Text("%s", tag.tag.c_str());
+
+    //     }
+    // }
+
+    // auto view = m_Scene->Reg().create();
+    auto& reg = m_Scene.get()->Reg();
+    
+    // if (&reg != nullptr)
+    //     auto view = reg.view<TransformComponent>();
 }
 
 void UILayer::create_plots()
@@ -375,13 +420,31 @@ void UILayer::create_inspector(AppSettings &settings)
     ImGui::BeginChild("Empty");
     ImGui::PopStyleColor();
 
+    static bool closable_group = true;
+    ImGui::Checkbox("Show Transform", &closable_group);
+    ImGui::Separator();
+
+    if (ImGui::CollapsingHeader(ICON_FA_LOCATION_ARROW "\tTransform", &closable_group, ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::Text("Transform");
-        ImGui::Separator();
         ImGui::DragFloat3("Position", glm::value_ptr(m_position), 0.1f);
         ImGui::DragFloat3("Rotation", glm::value_ptr(m_rotation), 1.0f, -180.0f, 180.0f);
         ImGui::DragFloat3("Scale", glm::value_ptr(m_scale), 0.1f);
+        // ImGui::Text("IsItemHovered: %d", ImGui::IsItemHovered());
+        ImGui::Separator();
+    }
 
+    if (ImGui::CollapsingHeader(ICON_FA_CAMERA"\tCamera", &closable_group, ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        static bool primaryCamera = true;
+        ImGui::DragFloat3("Position", glm::value_ptr(m_CameraPosition), 0.1f);
+        ImGui::DragFloat("Rotation", &m_CameraRotation, 1.0f, -180.0f, 180.0f);
+        ImGui::DragFloat("Move Speed", &m_CameraMoveSpeed, 1.0f, 0.0f, 100.0f);
+        ImGui::DragFloat("Rotation Speed", &m_CameraRotationSpeed, 1.0f, 0.0f, 360.0f);
+        ImGui::Checkbox("Primary Camera", &primaryCamera);
+        ImGui::SameLine();
+
+        // ImGui::Text("IsItemHovered: %d", ImGui::IsItemHovered());
+        ImGui::Separator();
     }
 
     ImGui::EndChild();

@@ -3,14 +3,10 @@
 #include "ApplicationSettings.h"
 #include "UILayer/UILayer.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 #include <entt/entt.hpp>
 
 // Components
-#include <Components.h>
 
 // Systems
 // #include <Systems.h>
