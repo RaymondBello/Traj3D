@@ -90,22 +90,24 @@ void Application::run()
     runner_params.imGuiWindowParams.menuAppTitle = "File";
     runner_params.appWindowParams.windowGeometry.size = {m_settings.v_width, m_settings.v_height};
     runner_params.appWindowParams.restorePreviousGeometry = m_settings.restore_previous_dimensions;
-
-    runner_params.callbacks.LoadAdditionalFonts = [&]()
-    {m_ui.setup_fonts(m_settings); };
+    // runner_params.callbacks.LoadAdditionalFonts = [&]()
+    // {m_ui.setup_fonts(m_settings); };
+    runner_params.callbacks.LoadAdditionalFonts = std::bind(&UILayer::setup_fonts, &m_ui, m_settings);
 
     // Status bar
     runner_params.imGuiWindowParams.showStatusBar = true;
     runner_params.fpsIdling.enableIdling = m_settings.fps_idling;
-    runner_params.callbacks.ShowStatus = [&]()
-    { m_ui.status_bar(); };
+    // runner_params.callbacks.ShowStatus = [&]()
+    // { m_ui.status_bar(); };
+    runner_params.callbacks.ShowStatus = std::bind(&UILayer::status_bar, &m_ui);
 
     // Menu Bar
     runner_params.imGuiWindowParams.showMenuBar = true;
     runner_params.imGuiWindowParams.showMenu_App = true;
     runner_params.imGuiWindowParams.showMenu_View = true;
-    runner_params.callbacks.ShowMenus = [&]()
-    { m_ui.show_menu(); };
+    // runner_params.callbacks.ShowMenus = [&]()
+    // { m_ui.show_menu(); };
+    runner_params.callbacks.ShowMenus = std::bind(&UILayer::show_menu, &m_ui);
 
     // Theme
     auto &tweakedTheme = runner_params.imGuiWindowParams.tweakedTheme;
@@ -129,16 +131,20 @@ void Application::run()
     // ###############################
     // PostInit & BeforeExit callbacks
     // #####################################################
-    runner_params.callbacks.PostInit = [&]()
-    { m_ui.setup_renderer(); };
-    runner_params.callbacks.BeforeExit = [&]()
-    { m_ui.destroy_renderer(); };
+    // runner_params.callbacks.PostInit = [&]()
+    // { m_ui.setup_renderer(); };
+    // runner_params.callbacks.BeforeExit = [&]()
+    // { m_ui.destroy_renderer(); };
+
+    runner_params.callbacks.PostInit = std::bind(&UILayer::setup_renderer, &m_ui);
+    runner_params.callbacks.BeforeExit = std::bind(&UILayer::destroy_renderer, &m_ui);
 
     // #####################################################
     // Custom background
     // #####################################################
-    runner_params.callbacks.CustomBackground = [&]()
-    { m_ui.on_renderer_update(); };
+    // runner_params.callbacks.CustomBackground = [&]()
+    // { m_ui.on_renderer_update(); };
+    runner_params.callbacks.CustomBackground = std::bind(&UILayer::on_renderer_update, &m_ui);
 
     ImmApp::Run(runner_params);
 

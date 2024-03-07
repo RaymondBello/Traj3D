@@ -3,7 +3,8 @@
 UILayer::UILayer(/* args */)
     : m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 {
-    m_Scene.reset(new Scene());
+    // m_Scene.get() = Scene();
+    // m_Scene = std::make_shared<Scene>();
 }
 
 UILayer::~UILayer()
@@ -22,13 +23,15 @@ void UILayer::destroy_renderer()
     glDeleteVertexArrays(0, &m_vao);
     glDeleteBuffers(0, &m_vbo);
     glDeleteBuffers(0, &m_ibo);
-
 }
 
 void UILayer::setup_renderer()
 {
     // Print OpenGL version
     HelloImGui::Log(HelloImGui::LogLevel::Info, "Initializing OpenGL version: %s\n", glGetString(GL_VERSION));
+
+    m_Scene = std::make_shared<Scene>();
+    m_SelectedEntityId = -1;
 
     // Compile shader programs from files and create shaders
     std::string vertSrc, fragSrc;
@@ -42,9 +45,9 @@ void UILayer::setup_renderer()
     GLfloat vertices[] =
         {
             // position        // color
-            -0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,    1.0f, 0.0f, 0.0f,   // Lower left corner
-            0.5f, -0.5f * float(sqrt(3)) / 3,  0.0f,    0.0f, 1.0f, 0.0f,  // Lower right corner
-            0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f,  0.0f, 0.0f, 1.0f   // Upper corner
+            -0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, 1.0f, 0.0f, 0.0f,  // Lower left corner
+            0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, 0.0f, 1.0f, 0.0f,   // Lower right corner
+            0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f, 0.0f, 0.0f, 1.0f // Upper corner
         };
 
     GLfloat cubeVertices[] = {
@@ -111,8 +114,6 @@ void UILayer::setup_renderer()
         22, 23, 20  // second triangle
     };
 
-
-
     // // Define the vertices of the triangle and set up the vertex buffer with the corresponding layout
     // std::shared_ptr<OpenGLVertexBuffer> vertexBuffer;
     // vertexBuffer.reset(new OpenGLVertexBuffer(vertices, sizeof(vertices)));
@@ -121,7 +122,6 @@ void UILayer::setup_renderer()
     // };
     // vertexBuffer->SetLayout(layout);
     // m_VertexArray->AddVertexBuffer(vertexBuffer);
-
 
     // Create reference containers for the Vertex Array Object and the Vertex Buffer Object
     GLuint VAO, VBO, EBO;
@@ -156,6 +156,33 @@ void UILayer::setup_renderer()
     // glUniformMatrix4fv(initModelMatrixLocation, 1, GL_FALSE, glm::value_ptr(initModelMatrix));
 
     // Bind both the VBO and VAO to 0 so that we don't accidentally modify the VAO and VBO we created
+    // Create a framebuffer
+    GLuint framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    // create a color attachment texture
+    GLuint textureColorbuffer;
+    glGenTextures(1, &textureColorbuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_settings.v_width, m_settings.v_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+    // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+    GLuint rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_settings.v_width, m_settings.v_height); // use a single renderbuffer object for both a depth AND stencil buffer.
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);         // now actually attach it
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        HelloImGui::Log(HelloImGui::LogLevel::Error, "Framebuffer is incomplete!");
+    }
+
+    // Unbind framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -181,7 +208,6 @@ void UILayer::on_renderer_update()
     glClearColor(0.30f, 0.55f, 0.65f, 1.0f);
     glViewport(0, 0, (GLsizei)displaySize.x, (GLsizei)displaySize.y);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
     glUseProgram(m_Shader->m_RendererID);
     auto modelMatrix = glm::mat4(1.0f);
@@ -236,9 +262,7 @@ void UILayer::on_renderer_update()
     // glCullFace(GL_FRONT);
     glCullFace(GL_BACK);
     // glDisable(GL_CULL_FACE);
-
 }
-
 
 void UILayer::initialize()
 {
@@ -265,21 +289,21 @@ HelloImGui::DockingParams UILayer::create_layout()
 
 std::vector<HelloImGui::DockingSplit> UILayer::create_docking_splits()
 {
-    //     _____________________________________________
-    //    |          |                      |          |
-    //    | Inspector|                      | Entity   |
-    //    |          |    MainDockSpace     |          |
-    //    |          |                      |          |
-    //    |          |                      |          |
-    //    |          |                      |          |
-    //    |          |----------------------|----------|
-    //    |          |  Logs                           |
-    //    ---------------------------------------------|
+    //     __________________________________
+    //    |                      |          |
+    //    |                      | Entity   |
+    //    |    MainDockSpace     |          |
+    //    |    | SceneView       |          |
+    //    |                      |          |
+    //    |                      |          |
+    //    |----------------------|----------|
+    //    |  Logs                           |
+    //    ----------------------------------|
     HelloImGui::DockingSplit inspector_split;
     inspector_split.initialDock = "MainDockSpace";
     inspector_split.newDock = "Inspector";
     inspector_split.direction = ImGuiDir_Right;
-    inspector_split.ratio = 0.2f;
+    inspector_split.ratio = 0.25f;
 
     HelloImGui::DockingSplit logs_split;
     logs_split.initialDock = "MainDockSpace";
@@ -287,17 +311,16 @@ std::vector<HelloImGui::DockingSplit> UILayer::create_docking_splits()
     logs_split.direction = ImGuiDir_Down;
     logs_split.ratio = 0.2f;
 
-    HelloImGui::DockingSplit scene_split;
-    scene_split.initialDock = "Inspector";
-    scene_split.newDock = "Scene";
-    scene_split.direction = ImGuiDir_Up;
-    scene_split.ratio = 0.35f;
+    HelloImGui::DockingSplit hierarchy;
+    hierarchy.initialDock = "Inspector";
+    hierarchy.newDock = "Hierarchy";
+    hierarchy.direction = ImGuiDir_Up;
+    hierarchy.ratio = 0.35f;
 
     std::vector<HelloImGui::DockingSplit> splits{
         inspector_split,
         logs_split,
-        scene_split};
-
+        hierarchy};
     return splits;
 }
 
@@ -311,10 +334,17 @@ std::vector<HelloImGui::DockableWindow> UILayer::create_docking_windows(AppSetti
     w_inspector.GuiFunction = [&]
     { create_inspector(settings); };
 
+    // Scene
+    HelloImGui::DockableWindow w_scene;
+    w_scene.label = ICON_FA_SITEMAP " Scene";
+    w_scene.dockSpaceName = "MainDockSpace";
+    w_scene.GuiFunction = [&]
+    { create_scene(); };
+
     // Node Hierarchy
     HelloImGui::DockableWindow w_hierarchy;
     w_hierarchy.label = ICON_FA_SITEMAP " Hierarchy";
-    w_hierarchy.dockSpaceName = "Scene";
+    w_hierarchy.dockSpaceName = "Hierarchy";
     w_hierarchy.GuiFunction = [&]
     { create_hierarchy(); };
 
@@ -334,12 +364,20 @@ std::vector<HelloImGui::DockableWindow> UILayer::create_docking_windows(AppSetti
 
     std::vector<HelloImGui::DockableWindow>
         dockableWindows{
+            w_scene,
             w_inspector,
             w_hierarchy,
             w_plots,
             w_logger};
 
     return dockableWindows;
+}
+
+void UILayer::create_scene()
+{
+    ImGui::BeginChild("Scene");
+    ImGui::Text("Scene Framebuffer");
+    ImGui::EndChild();
 }
 
 void UILayer::create_hierarchy()
@@ -350,50 +388,46 @@ void UILayer::create_hierarchy()
     static int selectionMask = (1 << 0);
     int node_clicked = -1;
 
-    for (uint8_t i = 0; i < 5; i++)
-    {
-        ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-        const bool is_selected = (selectionMask & (1 << i)) != 0;
+    static uint32_t selectedEntity = 0;
+    uint32_t entityClicked = -1;
 
-        if (is_selected)
-            node_flags |= ImGuiTreeNodeFlags_Selected;
+    m_Scene->Reg().view<TagComponent>().each([&entityClicked](auto entity, auto &tag)
+                                             {
+                                                 ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+                                                 bool isSelected = (selectedEntity == (uint32_t)entity);
+                                                 if (isSelected)
+                                                 {
+                                                     node_flags |= ImGuiTreeNodeFlags_Selected;
+                                                 }
+                                                 bool node_open = ImGui::TreeNodeEx((void *)(intptr_t)entity, node_flags, "%s", tag.tag.c_str());
+                                                 if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+                                                 {
+                                                     entityClicked = (uint32_t)entity;
+                                                 }
+                                                 if (node_open)
+                                                 {
+                                                     ImGui::Text("Tag: %s", tag.tag.c_str());
+                                                     ImGui::TreePop();
+                                                 }
+                                             });
 
-        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, "Entity #%0d", i);
-        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-            node_clicked = i;
-
-        if (node_open)
-        {
-            ImGui::Text("id: %d", i);
-            ImGui::TreePop();
-        }
-    }
-    if (node_clicked != -1)
+    if (entityClicked != -1)
     {
         // Update selection state
         // (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
         if (ImGui::GetIO().KeyCtrl)
-            selectionMask ^= (1 << node_clicked); // CTRL+click to toggle
-        else                                       // if (!(selectionMask & (1 << node_clicked))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
-            selectionMask = (1 << node_clicked);  // Click to single-select
+        {
+            selectedEntity = -1;                  // CTRL+click to toggle
+            m_SelectedEntityId = -1;
+        }
+        else                                      // if (!(selectionMask & (1 << node_clicked))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
+        {
+            selectedEntity = entityClicked;       // Click to single-select
+            m_SelectedEntityId = selectedEntity;
+        }    
+            
     }
 
-    // Display Hierarchy
-    // if (m_Scene)
-    // {
-    //     for (auto entity : view)
-    //     {
-    //         auto &tag = view.get<TagComponent>(entity);
-    //         ImGui::Text("%s", tag.tag.c_str());
-
-    //     }
-    // }
-
-    // auto view = m_Scene->Reg().create();
-    auto& reg = m_Scene.get()->Reg();
-    
-    // if (&reg != nullptr)
-    //     auto view = reg.view<TransformComponent>();
 }
 
 void UILayer::create_plots()
@@ -420,11 +454,25 @@ void UILayer::create_inspector(AppSettings &settings)
     ImGui::BeginChild("Empty");
     ImGui::PopStyleColor();
 
-    static bool closable_group = true;
-    ImGui::Checkbox("Show Transform", &closable_group);
+    // Get entity
+    if (m_SelectedEntityId != -1)
+    {
+        if (m_Scene->Reg().any_of<TagComponent>((entt::entity)m_SelectedEntityId))
+        {
+
+            
+        }
+    }
+
+    static bool allowEditing = true;
+    static std::string tag = "Entity";
+
+    ImGui::Checkbox("##", &allowEditing);
+    ImGui::SameLine();
+    ImGui::InputText("Name", &tag, allowEditing ? 0 : ImGuiInputTextFlags_ReadOnly);
     ImGui::Separator();
 
-    if (ImGui::CollapsingHeader(ICON_FA_LOCATION_ARROW "\tTransform", &closable_group, ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader(ICON_FA_LOCATION_ARROW "\tTransform", ImGuiTreeNodeFlags_DefaultOpen))
     {
         ImGui::DragFloat3("Position", glm::value_ptr(m_position), 0.1f);
         ImGui::DragFloat3("Rotation", glm::value_ptr(m_rotation), 1.0f, -180.0f, 180.0f);
@@ -433,7 +481,7 @@ void UILayer::create_inspector(AppSettings &settings)
         ImGui::Separator();
     }
 
-    if (ImGui::CollapsingHeader(ICON_FA_CAMERA"\tCamera", &closable_group, ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader(ICON_FA_CAMERA "\tCamera", ImGuiTreeNodeFlags_DefaultOpen))
     {
         static bool primaryCamera = true;
         ImGui::DragFloat3("Position", glm::value_ptr(m_CameraPosition), 0.1f);
@@ -441,8 +489,6 @@ void UILayer::create_inspector(AppSettings &settings)
         ImGui::DragFloat("Move Speed", &m_CameraMoveSpeed, 1.0f, 0.0f, 100.0f);
         ImGui::DragFloat("Rotation Speed", &m_CameraRotationSpeed, 1.0f, 0.0f, 360.0f);
         ImGui::Checkbox("Primary Camera", &primaryCamera);
-        ImGui::SameLine();
-
         // ImGui::Text("IsItemHovered: %d", ImGui::IsItemHovered());
         ImGui::Separator();
     }

@@ -14,7 +14,7 @@ public:
     // TEMP
     entt::registry &Reg() { return m_Registry; }
 
-    void OnUpdate(float dt);
+    // void OnUpdate(float dt);
 
 private:
     entt::registry m_Registry;

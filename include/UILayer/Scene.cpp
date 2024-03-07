@@ -4,7 +4,7 @@
 Scene::Scene(/* args */)
 {
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 3; i++)
     {
         auto entity = m_Registry.create();
 
@@ -14,12 +14,6 @@ Scene::Scene(/* args */)
         m_Registry.emplace<TransformComponent>(entity, glm::vec3(0.0f, 0.01f*i, -2.0f), glm::vec3(10.0f*i, 20.0f*i, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
     }
 
-    auto view = m_Registry.view<TagComponent>();
-
-    for (auto entity : view)
-    {
-        HelloImGui::Log(HelloImGui::LogLevel::Info, "Found entity: %s\n", m_Registry.get<TagComponent>(entity).tag.c_str()); 
-    }
 }
 
 Scene::~Scene()

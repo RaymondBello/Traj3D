@@ -91,6 +91,9 @@ private:
     GLuint m_ibo;
     GLuint m_indexCount;
 
+    GLuint m_fbo = 0;
+    GLuint m_fboColorAttachment = 0, m_fboDepthAttachment = 0;
+
     // UI Variables
     float m_rotationX = 45.0f;
     float m_rotationY = 30.0f;
@@ -113,18 +116,19 @@ private:
     // Plotting
     uint64_t PLOT_BUFFER_SIZE = 1000;
 
+    // Entities
+    uint32_t m_SelectedEntityId;
+
     // Simulation
 
 
 public:
-    // Entity Component Registry
-    std::shared_ptr<entt::registry> m_Registry;
-
     // UI Entity Inspector
     std::shared_ptr<uint32_t> m_Selected_entity;
 
     // Scene
     std::shared_ptr<Scene> m_Scene;
+    // Scene* m_Scene;
 
     UILayer(/* args */);
     UILayer(AppSettings& settings);
@@ -143,6 +147,7 @@ public:
     void create_inspector(AppSettings &settings);
     void create_plots();
     void create_hierarchy();
+    void create_scene();
 
     // Renderer related
     void setup_renderer();
