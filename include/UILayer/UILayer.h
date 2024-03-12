@@ -76,20 +76,20 @@ private:
     Renderer *m_Renderer = nullptr;
 
     OpenGLShader *m_Shader = nullptr;
-    OpenGLVertexArray *m_VertexArray = nullptr;
+    OpenGLShader *m_ScreenShader = nullptr;
 
-    Shader *m_FlatColorShader = nullptr;
-    VertexArray *m_SquareVA = nullptr;
-
-    glm::vec3 m_SquareColor = {0.2f, 0.3f, 0.8f};
-
-    // std::shared_ptr<Shader> m_Shader;
-    // std::shared_ptr<VertexArray> m_VertexArray;
+    std::shared_ptr<OpenGLVertexArray> m_CubeVAO;
+    std::shared_ptr<OpenGLVertexArray> m_PlaneVAO;
+    std::shared_ptr<OpenGLVertexArray> m_ScreenQuadVAO;
 
     GLuint m_vao;
     GLuint m_vbo;
     GLuint m_ibo;
     GLuint m_indexCount;
+
+    GLuint m_frameBuffer;
+    GLuint m_textureColorBuffer;
+    GLuint m_textureRenderBuffer;
 
     GLuint m_fbo = 0;
     GLuint m_fboColorAttachment = 0, m_fboDepthAttachment = 0;

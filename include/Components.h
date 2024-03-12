@@ -5,13 +5,9 @@
 
 struct TagComponent
 {
-    TagComponent() : tag{std::string()} 
+    TagComponent(const std::string &tag = std::string("")) : tag{tag} 
     {
-    };
-    
-    TagComponent(std::string &tag) : tag{tag} 
-    {
-    };
+    }
 
     std::string tag;
 };
@@ -19,19 +15,12 @@ struct TagComponent
 
 struct TransformComponent
 {
-    // Default constructor which initializes all members to zero.
-    TransformComponent() : position{0.0f, 0.0f, 0.0f}, // initial position
-                           rotation{0.0f, 0.0f, 0.0f}, // initial rotation in degrees
-                           scale{1.0f, 1.0f, 1.0f}     // initial scale
-    {
-    }
-
-    // Constructor that allows to set all members.
-    TransformComponent(const glm::vec3 &position,
-                       const glm::vec3 &rotation,
-                       const glm::vec3 &scale) : position{position}, // entity's position
-                                                 rotation{rotation}, // entity's rotation in degrees
-                                                 scale{scale}        // entity's scale
+    // Constructor that allows to set position and rotation, with default rotation value.
+    TransformComponent(const glm::vec3 &position = glm::vec3{0.0f, 0.0f, 0.0f},
+                       const glm::vec3 &rotation = glm::vec3{0.0f, 0.0f, 0.0f},
+                       const glm::vec3 &scale = glm::vec3{1.0f, 1.0f, 1.0f}) :  position{position},     // default position
+                                                                                rotation{rotation},     // default rotation in degrees
+                                                                                scale{scale}            // default scale
     {
     }
 
@@ -44,7 +33,6 @@ struct TransformComponent
         transformMatrix = glm::rotate(transformMatrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
         transformMatrix = glm::rotate(transformMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
         transformMatrix = glm::scale(transformMatrix, scale);
-
         return transformMatrix;
     }
 
@@ -57,8 +45,6 @@ struct TransformComponent
     // Scale of the entity in 3D space.
     glm::vec3 scale;
 };
-
-
 
 struct CameraComponent
 {
