@@ -45,17 +45,17 @@ OpenGLVertexArray::~OpenGLVertexArray()
     glDeleteVertexArrays(1, &m_RendererID);
 }
 
-void OpenGLVertexArray::Bind() const
+void OpenGLVertexArray::Bind()
 {
     glBindVertexArray(m_RendererID);
 }
 
-void OpenGLVertexArray::Unbind() const
+void OpenGLVertexArray::Unbind()
 {
     glBindVertexArray(0);
 }
 
-void OpenGLVertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer> &vertexBuffer)
+void OpenGLVertexArray::AddVertexBuffer(const std::shared_ptr<OpenGLVertexBuffer> &vertexBuffer)
 {
     // HZ_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
 
@@ -72,14 +72,14 @@ void OpenGLVertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer> &ver
                               ShaderDataTypeToOpenGLBaseType(element.Type),
                               element.Normalized ? GL_TRUE : GL_FALSE,
                               layout.GetStride(),
-                              (const void *)element.Offset);
+                              (const void *)(uintptr_t)element.Offset);
         index++;
     }
 
     m_VertexBuffers.push_back(vertexBuffer);
 }
 
-void OpenGLVertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer> &indexBuffer)
+void OpenGLVertexArray::SetIndexBuffer(const std::shared_ptr<OpenGLIndexBuffer> &indexBuffer)
 {
     glBindVertexArray(m_RendererID);
     indexBuffer->Bind();

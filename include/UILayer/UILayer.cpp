@@ -31,39 +31,6 @@ void UILayer::setup_renderer()
     #define VSHADER(name) load_shader(get_assets_folder() + "shaders/" #name ".vert")
     #define FSHADER(name) load_shader(get_assets_folder() + "shaders/" #name ".frag")
 
-    // GLfloat cubeVertices[] = {
-    //     // front position      // front color
-    //     -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // 0 (red)
-    //     0.5f, -0.5f, -0.5f,  1.0f, 0.5f, 0.0f, // 1 (orange)
-    //     0.5f, 0.5f, -0.5f,   1.0f, 1.0f, 0.0f, // 2 (yellow)
-    //     -0.5f, 0.5f, -0.5f,  0.0f, 1.0f, 0.0f, // 3 (green)
-    //     // top position     // top color
-    //     -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 1.0f,  // 4 (blue)
-    //     0.5f, 0.5f, -0.5f,  0.5f, 0.0f, 1.0f,  // 5 (indigo)
-    //     0.5f, 0.5f, 0.5f,   1.0f, 0.0f, 1.0f,  // 6 (violet)
-    //     -0.5f, 0.5f, 0.5f,  0.5f, 0.5f, 0.5f,  // 7 (gray)
-    //     // left position     // left color
-    //     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, // 8 (cyan)
-    //     -0.5f, 0.5f, -0.5f,  1.0f, 0.5f, 0.5f, // 9 (pink)
-    //     -0.5f, 0.5f, 0.5f,   0.5f, 1.0f, 0.5f, // 10 (light green)
-    //     -0.5f, -0.5f, 0.5f,  0.5f, 0.5f, 1.0f, // 11 (light blue)
-    //     // right position   // right color
-    //     0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.5f,  // 12 (dark pink)
-    //     0.5f, 0.5f, -0.5f,  0.0f, 1.0f, 0.5f,  // 13 (light yellow)
-    //     0.5f, 0.5f, 0.5f,   0.5f, 0.0f, 1.0f,  // 14 (dark purple)
-    //     0.5f, -0.5f, 0.5f,  1.0f, 0.5f, 0.0f,  // 15 (orange yellow)
-    //     // back position    // back color
-    //     -0.5f, -0.5f, 0.5f, 0.0f, 0.5f, 1.0f,  // 16 (light blue)
-    //     0.5f, -0.5f, 0.5f,  0.5f, 1.0f, 0.0f,  // 17 (yellow green)
-    //     0.5f, 0.5f, 0.5f,   0.0f, 0.5f, 0.0f,  // 18 (dark green)
-    //     -0.5f, 0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  // 19 (dark pink)
-    //     // bottom position   // bottom color
-    //     -0.5f, -0.5f, 0.5f,  0.3f, 0.3f, 0.3f, // 20
-    //     0.5f, -0.5f, 0.5f,   0.3f, 0.3f, 0.3f, // 21
-    //     0.5f, -0.5f, -0.5f,  0.3f, 0.3f, 0.3f, // 22
-    //     -0.5f, -0.5f, -0.5f, 0.3f, 0.3f, 0.3f  // 23
-    // };
-
     GLfloat cubeVertices[] = {
         // front
         -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // 0 (red)
@@ -163,16 +130,6 @@ void UILayer::setup_renderer()
     m_CubeVAO->AddVertexBuffer(cubeVBO);
     m_CubeVAO->SetIndexBuffer(std::make_shared<OpenGLIndexBuffer>(cubeVertexIndices, sizeof(cubeVertexIndices) / sizeof(GLuint)));
 
-    // Create a vertex array for a screen quad
-    m_ScreenQuadVAO = std::make_shared<OpenGLVertexArray>();
-    auto screenQuadVBO = std::make_shared<OpenGLVertexBuffer>(quadVertices, sizeof(quadVertices));
-    BufferLayout screenQuadLayout = {
-        {ShaderDataType::Float2, "a_Position"},
-        {ShaderDataType::Float2, "a_TexCoords"}
-    };
-    screenQuadVBO->SetLayout(screenQuadLayout);
-    m_ScreenQuadVAO->AddVertexBuffer(screenQuadVBO);
-
     m_Shader->Bind();
     m_Shader->UploadUniformMat4("u_ModelMatrix", glm::mat4(1.0f));
     m_Shader->Unbind();
@@ -226,7 +183,7 @@ void UILayer::on_renderer_update()
 
     ImVec2 displaySize = r;
 
-    // Clear the screen
+    // Clear the viewport
     glClearColor(0.133f, 0.545f, 0.133f, 1.0f); // Forest Green
     glViewport(0, 0, (GLsizei)displaySize.x, (GLsizei)displaySize.y);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -235,7 +192,7 @@ void UILayer::on_renderer_update()
     glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
     glEnable(GL_DEPTH_TEST);
 
-    // Clear the screen
+    // Clear the framebuffer
     glClearColor(0.30f, 0.55f, 0.65f, 1.0f);
     // glViewport(0, 0, (GLsizei)displaySize.x, (GLsizei)displaySize.y);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

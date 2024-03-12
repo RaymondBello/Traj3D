@@ -1,24 +1,25 @@
 #pragma once
 
-#include "Renderer/VertexArray.h"
+#include <memory>
+#include "OpenGLBuffer.h"
 
-class OpenGLVertexArray : public VertexArray
+class OpenGLVertexArray
 {
 public:
     OpenGLVertexArray();
-    virtual ~OpenGLVertexArray();
+    ~OpenGLVertexArray();
 
-    virtual void Bind() const override;
-    virtual void Unbind() const override;
+    void Bind();
+    void Unbind();
 
-    virtual void AddVertexBuffer(const std::shared_ptr<VertexBuffer> &vertexBuffer) override;
-    virtual void SetIndexBuffer(const std::shared_ptr<IndexBuffer> &indexBuffer) override;
+    void AddVertexBuffer(const std::shared_ptr<OpenGLVertexBuffer> &vertexBuffer);
+    void SetIndexBuffer(const std::shared_ptr<OpenGLIndexBuffer> &indexBuffer);
 
-    virtual const std::vector<std::shared_ptr<VertexBuffer>> &GetVertexBuffers() const override { return m_VertexBuffers; }
-    virtual const std::shared_ptr<IndexBuffer> &GetIndexBuffer() const override { return m_IndexBuffer; }
+    const std::vector<std::shared_ptr<OpenGLVertexBuffer>> &GetVertexBuffers() const { return m_VertexBuffers; }
+    const std::shared_ptr<OpenGLIndexBuffer> &GetIndexBuffer() const { return m_IndexBuffer; }
 
 private:
     uint32_t m_RendererID;
-    std::vector<std::shared_ptr<VertexBuffer>> m_VertexBuffers;
-    std::shared_ptr<IndexBuffer> m_IndexBuffer;
+    std::vector<std::shared_ptr<OpenGLVertexBuffer>> m_VertexBuffers;
+    std::shared_ptr<OpenGLIndexBuffer> m_IndexBuffer;
 };

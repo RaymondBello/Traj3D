@@ -19,36 +19,25 @@
 
 #include "ApplicationSettings.h"
 
+// ---GLM--------------------------------------------
 #include <lib/glm/glm.hpp>
 #include <lib/glm/gtc/matrix_transform.hpp>
 #include <lib/glm/gtc/type_ptr.hpp>
-
+// ---ASSIMP-----------------------------------------
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-
-// ---Renderer------------------------
-#include "Renderer/Renderer.h"
-#include "Renderer/RenderCommand.h"
-
+// ---OPENGL----------------------------------------
 #include "OpenGL/OpenGLShader.h"
 #include "OpenGL/OpenGLVertexArray.h"
 #include "OpenGL/OpenGLBuffer.h"
-
-#include "Renderer/Buffer.h"
-#include "Renderer/Shader.h"
-#include "Renderer/VertexArray.h"
-
+// ---RENDERER----------------------------------------
 #include "Renderer/OrthographicCamera.h"
-
+// ---SCENE & ENTITIES--------------------------------
 #include "Components.h"
-
 #include "Scene.h"
 
-
-
-// -----------------------------------
+// ---------------------------------------------------
 inline std::string get_assets_folder()
 {
 #ifndef __EMSCRIPTEN__
@@ -57,6 +46,8 @@ inline std::string get_assets_folder()
     return "/";
 #endif
 }
+// ---------------------------------------------------
+
 
 class UILayer
 {
@@ -72,9 +63,7 @@ private:
     ImFont *m_ui_font = nullptr;
     ImPlotContext *m_plot_context = nullptr;
 
-    // Renderer
-    Renderer *m_Renderer = nullptr;
-
+    // Shader
     OpenGLShader *m_Shader = nullptr;
     OpenGLShader *m_ScreenShader = nullptr;
 

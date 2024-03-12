@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Renderer/Shader.h"
 #include <lib/glm/glm.hpp>
 
 #include "hello_imgui/hello_imgui.h"
@@ -9,14 +8,15 @@
 #include "hello_imgui/internal/whereami/whereami_cpp.h"
 #include "hello_imgui/hello_imgui_include_opengl.h"
 
-class OpenGLShader : public Shader
+
+class OpenGLShader 
 {
 public:
     OpenGLShader(const std::string &vertexSrc, const std::string &fragmentSrc);
-    virtual ~OpenGLShader();
+    ~OpenGLShader();
 
-    virtual void Bind() const override;
-    virtual void Unbind() const override;
+    void Bind() const;
+    void Unbind() const;
 
     void UploadUniformInt(const std::string &name, int value);
 
