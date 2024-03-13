@@ -35,6 +35,7 @@
 #include "Renderer/OrthographicCamera.h"
 // ---SCENE & ENTITIES--------------------------------
 #include "Components.h"
+#include "Geometry.h"
 #include "Scene.h"
 
 // ---------------------------------------------------
