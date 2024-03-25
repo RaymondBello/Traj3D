@@ -27,10 +27,6 @@ void UILayer::destroy_renderer()
 
 void UILayer::setup_renderer()
 {
-    // Macros
-    #define VSHADER(name) load_shader(get_assets_folder() + "shaders/" #name ".vert")
-    #define FSHADER(name) load_shader(get_assets_folder() + "shaders/" #name ".frag")
-
     GLfloat cubeVertices[] = {
         // front
         -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // 0 (red)
@@ -111,39 +107,12 @@ void UILayer::setup_renderer()
     HelloImGui::Log(HelloImGui::LogLevel::Info, "Initializing OpenGL version: %s\n", glGetString(GL_VERSION));
 
     // Create a scene
-    m_Scene = std::make_shared<Scene>();
     m_SelectedEntityId = -1;
+    m_Scene = std::make_shared<Scene>();
 
-    m_Shader = new OpenGLShader(VSHADER(default), FSHADER(default));
-    // m_Shader = new OpenGLShader(VSHADER(fb_shader), FSHADER(fb_shader));
-    // m_ScreenShader = new OpenGLShader(VSHADER(fb_screen_shader), FSHADER(fb_screen_shader));
+    m_Scene->BeginScene();
 
-    // Create a vertex array for a cube
-    m_CubeVAO = std::make_shared<OpenGLVertexArray>();
-    auto cubeVBO = std::make_shared<OpenGLVertexBuffer>(cubeVertices, sizeof(cubeVertices));
-    BufferLayout cubeLayout = {
-        {ShaderDataType::Float3, "a_Position"},
-        // {ShaderDataType::Float2, "a_TexCoords"}
-        {ShaderDataType::Float3, "a_Color"}
-    };
-    cubeVBO->SetLayout(cubeLayout);
-    m_CubeVAO->AddVertexBuffer(cubeVBO);
-    m_CubeVAO->SetIndexBuffer(std::make_shared<OpenGLIndexBuffer>(cubeVertexIndices, sizeof(cubeVertexIndices) / sizeof(GLuint)));
-
-    m_Shader->Bind();
-    m_Shader->UploadUniformMat4("u_ModelMatrix", glm::mat4(1.0f));
-    m_Shader->Unbind();
-
-    // m_Shader->Bind();
-    // m_Shader->UploadUniformInt("u_Texture1", 0);
-    // m_Shader->Unbind();
-
-    // m_ScreenShader->Bind();
-    // m_ScreenShader->UploadUniformInt("u_ScreenTexture", 0);
-    // m_ScreenShader->Unbind();
-
-
-    // Bind both the VBO and VAO to 0 so that we don't accidentally modify the VAO and VBO we created
+    
     // Create a framebuffer
     glGenFramebuffers(1, &m_frameBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
@@ -164,11 +133,11 @@ void UILayer::setup_renderer()
     {
         HelloImGui::Log(HelloImGui::LogLevel::Error, "Framebuffer is incomplete!");
     }
-    // glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Unbind framebuffer
+    // glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -193,87 +162,48 @@ void UILayer::on_renderer_update()
     glEnable(GL_DEPTH_TEST);
 
     // Clear the framebuffer
-    glClearColor(0.30f, 0.55f, 0.65f, 1.0f);
-    // glViewport(0, 0, (GLsizei)displaySize.x, (GLsizei)displaySize.y);
+    glClearColor(0.30f, 0.55f, 0.65f, 1.0f); // Sky Blue
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_Shader->Bind();
+    for (auto &&[entity, mesh, transform] : m_Scene->Reg().view<MeshComponent, TransformComponent>().each())
+    {
+        if (mesh.shader.instance != nullptr) 
+        {
+            mesh.shader.instance->Bind();
+            mesh.shader.instance->UploadUniformMat4("u_ModelMatrix", transform.getMatrix());
 
-    // Add the model matrix and translate it
-    auto modelMatrix = glm::mat4(1.0f);
-    // modelMatrix = glm::translate(modelMatrix, m_position);
-    // // Add rotation to the model matrix
-    // modelMatrix = glm::rotate(modelMatrix, glm::radians(m_rotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
-    // modelMatrix = glm::rotate(modelMatrix, glm::radians(m_rotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
-    // modelMatrix = glm::rotate(modelMatrix, glm::radians(m_rotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
-    // // Add scale to the model matrix
-    // modelMatrix = glm::scale(modelMatrix, m_scale);
+            // Update View Matrix
+            auto viewMatrix = glm::mat4(1.0f);
+            viewMatrix = glm::lookAt(m_position, m_lookAt, glm::vec3(0.0f, 1.0f, 0.0f));
+            mesh.shader.instance->UploadUniformMat4("u_ViewMatrix", viewMatrix);
 
-    // Set the model matrix in the shader
-    m_Shader->UploadUniformMat4("u_ModelMatrix", glm::mat4(1.0f));
+            // Update Projection Matrix
+            auto projectionMatrix = glm::perspective(glm::radians(60.0f), displaySize.x / displaySize.y, 0.1f, 100.0f);
+            // auto projectionMatrix = glm::ortho(-3.0f, 3.0f, -2.0f, 2.0f, -1.0f, 1.0f);
+            mesh.shader.instance->UploadUniformMat4("u_ProjectionMatrix", projectionMatrix);
 
-    // Add the view matrix
-    auto viewMatrix = glm::mat4(1.0f);
-    // Set the view matrix in the shader
-    viewMatrix = glm::translate(viewMatrix, m_position);
-    // Add rotation to the view matrix
-    viewMatrix = glm::rotate(viewMatrix, glm::radians(m_rotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
-    viewMatrix = glm::rotate(viewMatrix, glm::radians(m_rotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
-    viewMatrix = glm::rotate(viewMatrix, glm::radians(m_rotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
-    // Add scale to the view matrix
-    viewMatrix = glm::scale(viewMatrix, m_scale);
-    m_Shader->UploadUniformMat4("u_ViewMatrix", viewMatrix);
+            // Bind the VAO for this mesh
+            mesh.vao->Bind();
 
-    // Create a projection matrix either orthographic or perspective
-    auto projectionMatrix = glm::perspective(glm::radians(60.0f), displaySize.x / displaySize.y, 0.1f, 100.0f);
-    // auto projectionMatrix = glm::ortho(-3.0f, 3.0f, -2.0f, 2.0f, -1.0f, 1.0f);
+            // Setup Face culling and depth testing
+            // glEnable(GL_DEPTH_TEST);
 
-    // Set the projection matrix in the shader
-    m_Shader->UploadUniformMat4("u_ProjectionMatrix", projectionMatrix);
+            // glEnable(GL_CULL_FACE);
+            // glCullFace(GL_BACK);
 
-    // Bind the VAO
-    m_CubeVAO->Bind();
+            glDrawElements(GL_TRIANGLES, mesh.vao->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
 
-    glDrawElements(GL_TRIANGLES, m_CubeVAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
-    // glDrawArrays(GL_TRIANGLES, 0, 36);
+            // glDisable(GL_CULL_FACE);
+            // glDisable(GL_DEPTH_TEST);
 
-    // Unbind the VAO and shader
-    m_CubeVAO->Unbind();
+            mesh.vao->Unbind();
 
-    // Setup Depth Testing
-    glEnable(GL_DEPTH_TEST);
-    // glDepthFunc(GL_LESS);
-    // glDepthFunc(GL_GREATER);
-    // glDisable(GL_DEPTH_TEST);
-
-    // Setup Face Culling
-    glEnable(GL_CULL_FACE);
-    // glFrontFace(GL_CCW);
-    // glCullFace(GL_FRONT);
-    glCullFace(GL_BACK);
-    // glDisable(GL_CULL_FACE);
-
-    // Unbind the shader
-    m_Shader->Unbind();
+        } 
+    }
 
     // Unbind the framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_DEPTH_TEST);
-
-    // // Clear the screen
-    // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    // glClear(GL_COLOR_BUFFER_BIT);
-
-    // m_ScreenShader->Bind();
-    // // Bind the VAO
-    // m_ScreenQuadVAO->Bind();
-    // glBindTexture(GL_TEXTURE_2D, m_textureColorBuffer);
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    // // Unbind the VAO and shader
-    // m_ScreenQuadVAO->Unbind();
-    // m_ScreenShader->Unbind();
-
 }
 
 void UILayer::initialize()
@@ -407,8 +337,12 @@ void UILayer::create_scene()
         }
 
         // Check if mouse is clicked then apply rotation
-        io.MouseDown[0] ? m_rotation.x += mouseDelta.y : 0;
-        io.MouseDown[0] ? m_rotation.z += mouseDelta.x : 0;
+        // io.MouseDown[0] ? m_rotation.x += mouseDelta.y : 0;
+        // io.MouseDown[0] ? m_rotation.z += mouseDelta.x : 0;
+
+
+        io.MouseDown[0] ? m_lookAt.y += mouseDelta.y * m_mouseSpeed : 0;
+        io.MouseDown[0] ? m_lookAt.x += mouseDelta.x * m_mouseSpeed : 0;
     }
     if (ImGui::IsWindowFocused())
     {
@@ -438,6 +372,26 @@ void UILayer::create_hierarchy()
 
     static uint32_t selectedEntity = -1;
     uint32_t entityClicked = -1;
+
+    if (ImGui::Button("Create Object", ImVec2(-1, 0)))
+    {
+        // Create popup menu with list of available components
+        ImGui::OpenPopup("create_object");
+    }
+
+    if (ImGui::BeginPopup("create_object"))
+    {
+        for (const auto &pair : ObjectTypeStringMap)
+        {
+            if (ImGui::Selectable(pair.second.c_str()))
+            {
+                m_Scene->AddObject(pair.first);
+            }
+        }
+        ImGui::EndPopup();
+    }
+
+    ImGui::Separator();
 
     m_Scene->Reg().view<TagComponent>().each([&entityClicked](auto entity, auto &tag)
     {
@@ -505,6 +459,9 @@ void UILayer::create_inspector(AppSettings &settings)
     // Get entity
     if (m_SelectedEntityId != -1)
     {
+        // Get entity
+        auto currentEntity = Entity((entt::entity)m_SelectedEntityId, m_Scene.get());
+
         // Create popup menu with list of available components
         bool addComponent = false;
 
@@ -516,26 +473,30 @@ void UILayer::create_inspector(AppSettings &settings)
 
         if (ImGui::BeginPopup("Add Component"))
         {
-            if (ImGui::Selectable("Transform"))
+            if (ImGui::Selectable("Transform Component"))
             {
-                bool hasComponent = m_Scene->Reg().any_of<TransformComponent>((entt::entity)m_SelectedEntityId);
+                // Check if component already exists
+                bool hasComponent = currentEntity.HasComponent<TransformComponent>();
+
                 if (!hasComponent)
-                    m_Scene->Reg().emplace<TransformComponent>((entt::entity)m_SelectedEntityId);
+                    currentEntity.AddComponent<TransformComponent>();
                 else
                 {
-                    auto tag = m_Scene->Reg().get<TagComponent>((entt::entity)m_SelectedEntityId).tag;
-                    HelloImGui::Log(HelloImGui::LogLevel::Error, "#%0u (%s): Transform component already exists!", (uint32_t)m_SelectedEntityId, tag.c_str());
+                    auto tag = currentEntity.GetComponent<TagComponent>().tag;
+                    HelloImGui::Log(HelloImGui::LogLevel::Error, "#%0u (%s): Transform component already exists!", (uint32_t)currentEntity.ID(), tag.c_str());
                 }
             }
             if (ImGui::Selectable("Camera Component"))
             {
-                bool hasComponent = m_Scene->Reg().any_of<CameraComponent>((entt::entity)m_SelectedEntityId);
+                // Check if component already exists
+                bool hasComponent = currentEntity.HasComponent<CameraComponent>();
+
                 if (!hasComponent)
-                    m_Scene->Reg().emplace<CameraComponent>((entt::entity)m_SelectedEntityId);
+                    currentEntity.AddComponent<CameraComponent>();
                 else
                 {
-                    auto tag = m_Scene->Reg().get<TagComponent>((entt::entity)m_SelectedEntityId).tag;
-                    HelloImGui::Log(HelloImGui::LogLevel::Error, "#%0u (%s): Camera component already exists!", (uint32_t)m_SelectedEntityId, tag.c_str());
+                    auto tag = currentEntity.GetComponent<TagComponent>().tag;
+                    HelloImGui::Log(HelloImGui::LogLevel::Error, "#%0u (%s): Camera component already exists!", (uint32_t)currentEntity.ID(), tag.c_str());
                 }
             }
             ImGui::EndPopup();
@@ -562,7 +523,7 @@ void UILayer::create_inspector(AppSettings &settings)
             if (ImGui::CollapsingHeader(ICON_FA_LOCATION_ARROW "\tTransform", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 ImGui::DragFloat3("Position", glm::value_ptr(m_Scene->Reg().get<TransformComponent>((entt::entity)m_SelectedEntityId).position), 0.1f);
-                ImGui::DragFloat3("Rotation", glm::value_ptr(m_Scene->Reg().get<TransformComponent>((entt::entity)m_SelectedEntityId).rotation), 1.0f, -180.0f, 180.0f);
+                ImGui::DragFloat3("Rotation", glm::value_ptr(m_Scene->Reg().get<TransformComponent>((entt::entity)m_SelectedEntityId).rotation), 1.0f);
                 ImGui::DragFloat3("Scale", glm::value_ptr(m_Scene->Reg().get<TransformComponent>((entt::entity)m_SelectedEntityId).scale), 0.1f);
                 ImGui::Separator();
             }
@@ -593,7 +554,9 @@ void UILayer::create_inspector(AppSettings &settings)
         ImGui::Text("%s", deselect.c_str());
 
         ImGui::Separator();
-
+        ImGui::Text("Camera");
+        ImGui::DragFloat3("Look At", glm::value_ptr(m_lookAt), 0.01f);
+        ImGui::DragFloat("Move Speed", &m_mouseSpeed, 0.01f, 0.0f, 1.0f);
         ImGui::DragFloat3("Position", glm::value_ptr(m_position), 0.1f);
         ImGui::DragFloat3("Rotation", glm::value_ptr(m_rotation), 1.0f);
         ImGui::DragFloat3("Scale", glm::value_ptr(m_scale), 0.1f);
@@ -605,32 +568,6 @@ void UILayer::create_inspector(AppSettings &settings)
 void UILayer::start_event_loop()
 {
     // ImmApp::Run(m_runner_params);
-}
-
-std::string UILayer::load_shader(std::string file)
-{
-    // Open a file and read the content into a char *
-    std::string content;
-    std::ifstream fileStream(file, std::ios::in);
-
-    if (!fileStream.is_open())
-    {
-        HelloImGui::Log(HelloImGui::LogLevel::Error, "Could not read file: %s\n", file.c_str());
-        return "";
-    }
-
-    std::string line = "";
-    while (!fileStream.eof())
-    {
-        std::getline(fileStream, line);
-        content.append(line + "\n");
-    }
-    fileStream.close();
-
-    std::string filename = file.substr(file.find_last_of("/") + 1);
-    HelloImGui::Log(HelloImGui::LogLevel::Debug, "Loaded shader: %s\n", filename.c_str());
-
-    return content;
 }
 
 void UILayer::show_menu()

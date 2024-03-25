@@ -3,6 +3,10 @@
 #include <lib/glm/glm.hpp>
 #include <lib/glm/gtc/matrix_transform.hpp>
 
+#include <OpenGL/OpenGLShader.h>
+#include <OpenGL/OpenGLVertexArray.h>
+#include <OpenGL/OpenGLBuffer.h>
+
 struct TagComponent
 {
     TagComponent(const std::string &tag = std::string("")) : tag{tag} 
@@ -75,3 +79,47 @@ struct CameraComponent
     glm::vec2 curr_mouse;
 };
 
+struct Shader
+{
+    std::string name;
+    OpenGLShader * instance = nullptr;
+};
+
+struct Mesh
+{
+    std::vector<GLuint> indices;
+    std::vector<GLfloat> positions;
+    std::vector<GLfloat> normals;
+    std::vector<GLfloat> textureCoords;
+};
+
+struct MeshComponent
+{
+    MeshComponent() = default;
+    MeshComponent(Shader shader, GLfloat vertices[], size_t verticesSize, GLuint indices[], size_t indicesSize, BufferLayout bufferLayout) : shader{shader}
+    {
+        vao = std::make_shared<OpenGLVertexArray>();
+        vbo = std::make_shared<OpenGLVertexBuffer>(vertices, verticesSize);
+        ibo = std::make_shared<OpenGLIndexBuffer>(indices, indicesSize/sizeof(GLuint));
+        layout = bufferLayout;
+        
+        vbo->SetLayout(layout);
+        vao->AddVertexBuffer(vbo);
+        vao->SetIndexBuffer(ibo);
+
+        if (shader.instance != nullptr) {
+            // Bind the shader and initialize the uniforms
+            shader.instance->Bind();
+            shader.instance->UploadUniformMat4("u_ModelMatrix", glm::mat4(1.0f));
+            shader.instance->Unbind();
+        }
+    };
+
+    Shader shader;
+    BufferLayout layout;
+
+    std::shared_ptr<Mesh> mesh;
+    std::shared_ptr<OpenGLVertexArray> vao;
+    std::shared_ptr<OpenGLVertexBuffer> vbo;
+    std::shared_ptr<OpenGLIndexBuffer> ibo;
+};

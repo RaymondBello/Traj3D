@@ -1,12 +1,45 @@
 #pragma once
-
-#include <stdio.h>
+#include <fstream>
 
 #include "hello_imgui/hello_imgui.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "hello_imgui/internal/whereami/whereami_cpp.h"
 #include "hello_imgui/hello_imgui_include_opengl.h"
+
+enum class ObjectType
+{
+    NONE = 0,
+    // Cameras
+    PERSPECTIVE_CAMERA,
+    ORTHOGRAPHIC_CAMERA,
+    // Light
+    DIRECTIONAL_LIGHT,
+    SPOT_LIGHT,
+    POINT_LIGHT,
+    // Model
+    MODEL,
+    // Geometry
+    CUBE,
+    SPHERE,
+    CUBE_MAP,
+    // Simulation
+    SIMULATION
+};
+
+const std::unordered_map<ObjectType, std::string> ObjectTypeStringMap = {
+    {ObjectType::PERSPECTIVE_CAMERA, "Perspective Camera"},
+    {ObjectType::ORTHOGRAPHIC_CAMERA, "Orthographic Camera"},
+    {ObjectType::DIRECTIONAL_LIGHT, "Directional Light"},
+    {ObjectType::SPOT_LIGHT, "Spot Light"},
+    {ObjectType::POINT_LIGHT, "Point Light"},
+    {ObjectType::MODEL, "Model"},
+    {ObjectType::CUBE, "Cube"},
+    {ObjectType::SPHERE, "Sphere"},
+    {ObjectType::CUBE_MAP, "Cube Map"},
+    {ObjectType::SIMULATION, "Simulation"}
+};
+
 
 enum class ShaderDataType
 {
@@ -143,3 +176,40 @@ private:
     uint32_t m_Stride = 0;
 };
 
+static std::string getAssetsFolder() 
+{
+#ifndef __EMSCRIPTEN__
+    return "assets/";
+#else
+    return "/";
+#endif
+}
+
+static std::string getShaderSrc(std::string file)
+{
+    // Open a file and read the content into a char *
+    std::string content;
+    std::ifstream fileStream(file, std::ios::in);
+
+    if (!fileStream.is_open())
+    {
+        HelloImGui::Log(HelloImGui::LogLevel::Error, "Could not read file: %s\n", file.c_str());
+        return "";
+    }
+
+    std::string line = "";
+    while (!fileStream.eof())
+    {
+        std::getline(fileStream, line);
+        content.append(line + "\n");
+    }
+    fileStream.close();
+
+    std::string filename = file.substr(file.find_last_of("/") + 1);
+    HelloImGui::Log(HelloImGui::LogLevel::Debug, "Loaded shader: %s\n", filename.c_str());
+
+    return content;
+}
+
+#define vShdrSrc(name) getShaderSrc(getAssetsFolder() + "shaders/" #name ".vert")
+#define fShdrSrc(name) getShaderSrc(getAssetsFolder() + "shaders/" #name ".frag")

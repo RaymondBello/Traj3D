@@ -65,8 +65,11 @@ file(GLOB_RECURSE APP_HEADERS "include/*.h")
 file(GLOB_RECURSE UILAYER_SRC "include/UILayer/*.cpp")
 file(GLOB_RECURSE RENDERER_SRC "include/Renderer/*.cpp")
 file(GLOB_RECURSE OPENGL_API_SRC "include/OpenGL/*.cpp")
+file(GLOB_RECURSE SCENE_SRC "include/Scene/*.cpp")
+
 
 imgui_bundle_add_app(${PROJECT_NAME}    ${APP_SOURCES} 
+                                        ${SCENE_SRC}
                                         ${UILAYER_SRC}
                                         ${RENDERER_SRC}
                                         ${OPENGL_API_SRC}

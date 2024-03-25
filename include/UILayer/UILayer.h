@@ -36,7 +36,9 @@
 // ---SCENE & ENTITIES--------------------------------
 #include "Components.h"
 #include "Geometry.h"
-#include "Scene.h"
+
+#include "Scene/Scene.h"
+#include "Scene/Entity.h"
 
 // ---------------------------------------------------
 inline std::string get_assets_folder()
@@ -88,7 +90,10 @@ private:
     float m_rotationX = 45.0f;
     float m_rotationY = 30.0f;
 
+    float m_mouseSpeed = 0.01f;
+
     glm::vec3 m_position = {-0.5f, -0.2f, -2.0f};
+    glm::vec3 m_lookAt   = {0.0f, 0.0f, 0.0f};
     glm::vec3 m_rotation = {-96.0f, -5.0f, -75.0f};
     glm::vec3 m_scale    = {1.0f, 1.0f, 1.0f};
 
@@ -139,11 +144,11 @@ public:
     void create_hierarchy();
     void create_scene();
 
+
     // Renderer related
     void setup_renderer();
     void destroy_renderer();
     void on_renderer_update();
-    std::string load_shader(std::string file);
 
     // Layout & Docking
     HelloImGui::DockingParams create_layout();
