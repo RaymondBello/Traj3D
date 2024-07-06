@@ -32,7 +32,8 @@
 #include "OpenGL/OpenGLVertexArray.h"
 #include "OpenGL/OpenGLBuffer.h"
 // ---RENDERER----------------------------------------
-#include "Renderer/OrthographicCamera.h"
+// #include "Renderer/OrthographicCamera.h"
+
 // ---SCENE & ENTITIES--------------------------------
 #include "Components.h"
 #include "Geometry.h"
@@ -90,18 +91,23 @@ private:
     float m_rotationX = 45.0f;
     float m_rotationY = 30.0f;
 
-    float m_mouseSpeed = 0.01f;
+    float m_mouseSpeed = 0.5f;
+    float m_moveSpeed = 3.0f;
+
+    // Camera
+    float yaw = 0.0f;
+    float pitch = 0.0f;
 
     glm::vec3 m_position = {-0.5f, -0.2f, -2.0f};
-    glm::vec3 m_lookAt   = {0.0f, 0.0f, 0.0f};
+    glm::vec3 m_lookAt   = {0.0f, 0.0f, 1.0f};
+    glm::vec3 m_upVector = glm::vec3(0.0f, 1.0f, 0.0f);
+
     glm::vec3 m_rotation = {-96.0f, -5.0f, -75.0f};
     glm::vec3 m_scale    = {1.0f, 1.0f, 1.0f};
 
     glm::mat4 m_modelMatrix = glm::mat4(1.0f);
 
-
     // Camera
-    OrthographicCamera m_Camera;
     glm::vec3 m_CameraPosition = {0.0f, 0.0f, 0.0f};
 
     float m_CameraMoveSpeed = 5.0f;
@@ -122,7 +128,7 @@ public:
     std::shared_ptr<uint32_t> m_Selected_entity;
 
     // Scene
-    std::shared_ptr<Scene> m_Scene;
+    std::shared_ptr<Scene> m_Scene = nullptr;
     // Scene* m_Scene;
 
     UILayer(/* args */);

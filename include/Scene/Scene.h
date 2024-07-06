@@ -12,11 +12,12 @@ public:
     ~Scene();
 
     void BeginScene();
-    void RenderScene();
+    void RenderScene(float width, float height);
     void EndScene();
 
     
     Entity CreateEntity(std::string name = "Entity");
+    Entity CreateRawEntity(std::string name = "Entity");
     Entity AddObject(ObjectType type);
 
     // TEMP
@@ -86,7 +87,27 @@ public:
         20, 21, 22, // first triangle
         22, 23, 20  // second triangle
     };
+
+    // Plane indices
+    GLfloat planeVertices[24] = {
+        // front
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // 0 (red)
+        0.5f, -0.5f, -0.5f, 1.0f, 0.5f, 0.0f,  // 1 (orange)
+        0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 0.0f,   // 2 (yellow)
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // 3 (green)
+    };
+
+    GLuint planeIndices[6] = {0, 1, 2, 2, 3, 0};
+
+    // Camera
+    Camera m_ActiveCamera;
+
 private:
     entt::registry m_Registry;
+
+
+    // Size of scene
+    float m_SceneWidth;
+    float m_SceneHeight;
 
 };

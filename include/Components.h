@@ -7,6 +7,8 @@
 #include <OpenGL/OpenGLVertexArray.h>
 #include <OpenGL/OpenGLBuffer.h>
 
+#include <Renderer/Camera.h>
+
 struct TagComponent
 {
     TagComponent(const std::string &tag = std::string("")) : tag{tag} 
@@ -52,31 +54,12 @@ struct TransformComponent
 
 struct CameraComponent
 {
-    // Constants (make const?)
-    float ROTATION_SPEED = 2.0f;
-    const glm::vec3 RIGHT = {1.0f, 0.0f, 0.0f};
-    const glm::vec3 UP = {0.0f, 1.0f, 0.0f};
-    const glm::vec3 FORWARD = {0.0f, 0.0f, -1.0f};
+    CameraComponent() {};
+    ~CameraComponent() = default;
+    CameraComponent(float width, float height) {camera = Camera(width, height);};
 
-    // Camera Attributes
-    float fov = 90.0f;
-    float aspect;
-    float near;
-    float far;
-    float distance = 5.0f;
-    glm::vec3 mFocus = {0.0f, 0.0f, 0.0f};
-
-    // Orientation
-    float pitch = 0.0f;
-    float yaw = 0.0f;
-
-    // World position and mouse screen coords
-    glm::mat4 view_mat;
-    glm::mat4 proj_mat = glm::mat4{1.0f};
-    glm::vec3 position = {0.0f, 0.0f, 0.0f};
-
-    // Mouse 2d screen coords
-    glm::vec2 curr_mouse;
+    Camera camera;
+    bool isPrimary = false;
 };
 
 struct Shader

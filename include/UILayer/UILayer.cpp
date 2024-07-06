@@ -1,7 +1,6 @@
 #include "UILayer.h"
 
 UILayer::UILayer(/* args */)
-    : m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 {
     // m_Scene.get() = Scene();
     // m_Scene = std::make_shared<Scene>();
@@ -12,7 +11,6 @@ UILayer::~UILayer()
 }
 
 UILayer::UILayer(AppSettings &settings)
-    : m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 {
     m_settings = settings;
     initialize();
@@ -111,8 +109,7 @@ void UILayer::setup_renderer()
     m_Scene = std::make_shared<Scene>();
 
     m_Scene->BeginScene();
-
-    
+ 
     // Create a framebuffer
     glGenFramebuffers(1, &m_frameBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
@@ -165,41 +162,71 @@ void UILayer::on_renderer_update()
     glClearColor(0.30f, 0.55f, 0.65f, 1.0f); // Sky Blue
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (auto &&[entity, mesh, transform] : m_Scene->Reg().view<MeshComponent, TransformComponent>().each())
+    // Render the scene
+    // m_Scene->RenderScene(displaySize.x, displaySize.y);
+
+    auto cameraView = m_Scene->Reg().view<CameraComponent>();
+    for (auto entity : cameraView)
     {
-        if (mesh.shader.instance != nullptr) 
+        auto &camera = cameraView.get<CameraComponent>(entity);
+        if (camera.isPrimary)
         {
-            mesh.shader.instance->Bind();
-            mesh.shader.instance->UploadUniformMat4("u_ModelMatrix", transform.getMatrix());
+            
 
-            // Update View Matrix
-            auto viewMatrix = glm::mat4(1.0f);
-            viewMatrix = glm::lookAt(m_position, m_lookAt, glm::vec3(0.0f, 1.0f, 0.0f));
-            mesh.shader.instance->UploadUniformMat4("u_ViewMatrix", viewMatrix);
+            for (auto &&[entity, mesh, transform] : m_Scene->Reg().view<MeshComponent, TransformComponent>().each())
+            {
+                if (mesh.shader.instance != nullptr)
+                {
+                    mesh.shader.instance->Bind();
 
-            // Update Projection Matrix
-            auto projectionMatrix = glm::perspective(glm::radians(60.0f), displaySize.x / displaySize.y, 0.1f, 100.0f);
-            // auto projectionMatrix = glm::ortho(-3.0f, 3.0f, -2.0f, 2.0f, -1.0f, 1.0f);
-            mesh.shader.instance->UploadUniformMat4("u_ProjectionMatrix", projectionMatrix);
+                    // Update Model Matrix
+                    transform.rotation.x += io.DeltaTime * 40.0f;
+                    transform.rotation.y += io.DeltaTime * 20.0f;
 
-            // Bind the VAO for this mesh
-            mesh.vao->Bind();
+                    // reset rotation to 0
+                    if (transform.rotation.x > 360.0f)
+                        transform.rotation.x = 0.0f;
+                    if (transform.rotation.y > 360.0f)
+                        transform.rotation.y = 0.0f;
 
-            // Setup Face culling and depth testing
-            // glEnable(GL_DEPTH_TEST);
+                    // Update Model Matrix
+                    mesh.shader.instance->UploadUniformMat4("u_ModelMatrix", transform.getMatrix());
 
-            // glEnable(GL_CULL_FACE);
-            // glCullFace(GL_BACK);
+                    // Update View Matrix
+                    auto viewMatrix = glm::mat4(1.0f);
+                    viewMatrix = glm::lookAt(m_position, m_position + m_lookAt, glm::vec3(0.0f, 1.0f, 0.0f));
 
-            glDrawElements(GL_TRIANGLES, mesh.vao->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+                    // camera.camera.updateCameraSize(displaySize.x, displaySize.y);
+                    // auto viewMatrix = camera.camera.getViewMatrix();
 
-            // glDisable(GL_CULL_FACE);
-            // glDisable(GL_DEPTH_TEST);
+                    mesh.shader.instance->UploadUniformMat4("u_ViewMatrix", viewMatrix);
 
-            mesh.vao->Unbind();
+                    // Update Projection Matrix
+                    auto projectionMatrix = glm::perspective(glm::radians(90.0f), displaySize.x / displaySize.y, 0.1f, 100.0f);
+                    // auto projectionMatrix = glm::ortho(-3.0f, 3.0f, -2.0f, 2.0f, -1.0f, 1.0f);
+                    mesh.shader.instance->UploadUniformMat4("u_ProjectionMatrix", projectionMatrix);
 
-        } 
+                    // Bind the VAO for this mesh
+                    mesh.vao->Bind();
+
+                    // Setup Face culling and depth testing
+                    // glEnable(GL_DEPTH_TEST);
+
+                    // glEnable(GL_CULL_FACE);
+                    // glCullFace(GL_BACK);
+
+                    glDrawElements(GL_TRIANGLES, mesh.vao->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+
+                    // glDisable(GL_CULL_FACE);
+                    // glDisable(GL_DEPTH_TEST);
+
+                    mesh.vao->Unbind();
+                }
+            }
+        }
     }
+
+    
 
     // Unbind the framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -340,21 +367,54 @@ void UILayer::create_scene()
         // io.MouseDown[0] ? m_rotation.x += mouseDelta.y : 0;
         // io.MouseDown[0] ? m_rotation.z += mouseDelta.x : 0;
 
+        // auto view = m_Scene->Reg().view<CameraComponent>();
+        // for (auto entity : view)
+        // {
+        //     auto &cameraComponent = view.get<CameraComponent>(entity);
+        //     if (cameraComponent.isPrimary)
+        //     {
+        //         cameraComponent.camera.updateMouseMovement(mouseDelta.x, mouseDelta.y);
+        //     }
+        // }
 
-        io.MouseDown[0] ? m_lookAt.y += mouseDelta.y * m_mouseSpeed : 0;
-        io.MouseDown[0] ? m_lookAt.x += mouseDelta.x * m_mouseSpeed : 0;
+        // Check if mouse is clicked then apply translation
+
+        float xoffset;
+        float yoffset;
+
+        if (io.MouseDown[0])
+        {
+            xoffset = mouseDelta.x * m_mouseSpeed;
+            yoffset = mouseDelta.y * m_mouseSpeed;
+
+            yaw += xoffset;
+            pitch += yoffset;
+
+            if (pitch > 89.0f)
+                pitch = 89.0f;
+            if (pitch < -89.0f)
+                pitch = -89.0f;
+
+            m_lookAt.x = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+            m_lookAt.y = sin(glm::radians(pitch));
+            m_lookAt.z = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+            m_lookAt = glm::normalize(m_lookAt);
+        }
+        // io.MouseDown[0] ? m_lookAt.y += mouseDelta.y * m_mouseSpeed : 0;
+        // io.MouseDown[0] ? m_lookAt.x += mouseDelta.x * m_mouseSpeed : 0;
+
+        // io.MouseDown
     }
     if (ImGui::IsWindowFocused())
     {
         // Check if keys are pressed then apply translation
-        io.KeysData[ImGuiKey_A].Down ? m_position[0] += 1.0f * dt : 0;
-        io.KeysData[ImGuiKey_D].Down ? m_position[0] -= 1.0f * dt : 0;
+        io.KeysData[ImGuiKey_Q].Down ? m_position[1] += m_moveSpeed * dt : 0;
+        io.KeysData[ImGuiKey_E].Down ? m_position[1] -= m_moveSpeed * dt : 0;
 
-        io.KeysData[ImGuiKey_Q].Down ? m_position[1] -= 1.0f * dt : 0;
-        io.KeysData[ImGuiKey_E].Down ? m_position[1] += 1.0f * dt : 0;
-
-        io.KeysData[ImGuiKey_W].Down ? m_position[2] += 1.0f * dt : 0;
-        io.KeysData[ImGuiKey_S].Down ? m_position[2] -= 1.0f * dt : 0;
+        m_position += io.KeysData[ImGuiKey_W].Down ? m_moveSpeed * dt * m_lookAt : glm::vec3(0.0f);
+        m_position -= io.KeysData[ImGuiKey_S].Down ? m_moveSpeed * dt * m_lookAt : glm::vec3(0.0f);
+        m_position += io.KeysData[ImGuiKey_D].Down ? glm::normalize(glm::cross(m_lookAt, m_upVector)) * m_moveSpeed * dt : glm::vec3(0.0f);
+        m_position -= io.KeysData[ImGuiKey_A].Down ? glm::normalize(glm::cross(m_lookAt, m_upVector)) * m_moveSpeed * dt : glm::vec3(0.0f);
     }
 
     ImGui::Image((void *)(intptr_t)m_textureColorBuffer, ImVec2(contentRegion.x, contentRegion.y), ImVec2(0, 1), ImVec2(1, 0));
@@ -533,12 +593,17 @@ void UILayer::create_inspector(AppSettings &settings)
         {
             if (ImGui::CollapsingHeader(ICON_FA_CAMERA "\tCamera", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                static bool primaryCamera = true;
-                ImGui::DragFloat3("Position", glm::value_ptr(m_CameraPosition), 0.1f);
-                ImGui::DragFloat("Rotation", &m_CameraRotation, 1.0f, -180.0f, 180.0f);
-                ImGui::DragFloat("Move Speed", &m_CameraMoveSpeed, 1.0f, 0.0f, 100.0f);
-                ImGui::DragFloat("Rotation Speed", &m_CameraRotationSpeed, 1.0f, 0.0f, 360.0f);
-                ImGui::Checkbox("Primary Camera", &primaryCamera);
+                auto cameraEntity = Entity((entt::entity)m_SelectedEntityId, m_Scene.get());
+
+                ImGui::DragFloat3("Camera Position", glm::value_ptr(cameraEntity.GetComponent<CameraComponent>().camera.position), 0.1f);
+                ImGui::DragFloat3("Front Vector", glm::value_ptr(cameraEntity.GetComponent<CameraComponent>().camera.frontVector), 0.1f,-1.0f,1.0f);
+                ImGui::DragFloat3("Up Vector", glm::value_ptr(cameraEntity.GetComponent<CameraComponent>().camera.upVector), 0.1f, -1.0f,1.0f);
+                ImGui::DragFloat("Field of View", &cameraEntity.GetComponent<CameraComponent>().camera.fieldOfView, 1.0f, 45, 150.0f);
+                ImGui::DragFloat("Look Sensitivity", &cameraEntity.GetComponent<CameraComponent>().camera.lookSensitivity, 0.01f, 0.01f, 50.0f);
+                ImGui::DragFloat("Look Sensitivity", &cameraEntity.GetComponent<CameraComponent>().camera.zoomSensitivity, 0.01f, 0.01f, 20.0f);
+                ImGui::DragFloat("Move Sensitivity", &cameraEntity.GetComponent<CameraComponent>().camera.moveSensitivity, 1.0f, 1.0f, 100.0f);
+
+                ImGui::Checkbox("Primary Camera", &cameraEntity.GetComponent<CameraComponent>().isPrimary);
                 ImGui::Separator();
             }
         }
@@ -556,7 +621,8 @@ void UILayer::create_inspector(AppSettings &settings)
         ImGui::Separator();
         ImGui::Text("Camera");
         ImGui::DragFloat3("Look At", glm::value_ptr(m_lookAt), 0.01f);
-        ImGui::DragFloat("Move Speed", &m_mouseSpeed, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("Mouse Speed", &m_mouseSpeed, 0.01f, 0.1f, 1.0f);
+        ImGui::DragFloat("Movement Speed", &m_moveSpeed, 0.01f, 0.1f, 50.0f);
         ImGui::DragFloat3("Position", glm::value_ptr(m_position), 0.1f);
         ImGui::DragFloat3("Rotation", glm::value_ptr(m_rotation), 1.0f);
         ImGui::DragFloat3("Scale", glm::value_ptr(m_scale), 0.1f);

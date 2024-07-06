@@ -11,9 +11,8 @@
 enum class ObjectType
 {
     NONE = 0,
-    // Cameras
-    PERSPECTIVE_CAMERA,
-    ORTHOGRAPHIC_CAMERA,
+    // Camera
+    CAMERA,
     // Light
     DIRECTIONAL_LIGHT,
     SPOT_LIGHT,
@@ -29,8 +28,7 @@ enum class ObjectType
 };
 
 const std::unordered_map<ObjectType, std::string> ObjectTypeStringMap = {
-    {ObjectType::PERSPECTIVE_CAMERA, "Perspective Camera"},
-    {ObjectType::ORTHOGRAPHIC_CAMERA, "Orthographic Camera"},
+    {ObjectType::CAMERA, "Camera"},
     {ObjectType::DIRECTIONAL_LIGHT, "Directional Light"},
     {ObjectType::SPOT_LIGHT, "Spot Light"},
     {ObjectType::POINT_LIGHT, "Point Light"},
